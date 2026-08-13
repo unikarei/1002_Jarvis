@@ -1,0 +1,15 @@
+[build-system]
+requires = ["hatchling>=1.26"]
+build-backend = "hatchling.build"
+
+[project]
+name = "prj-jarvis"
+version = "0.1.0"
+description = "Personal AI secretary and MiTiR integration client"
+requires-python = ">=3.12"
+dependencies = ["pydantic>=2.10,<3"]
+
+[tool.pytest.ini_options]
+pythonpath = ["src"]
+testpaths = ["tests"]
+

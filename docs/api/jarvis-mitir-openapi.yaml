@@ -1,0 +1,160 @@
+openapi: 3.1.0
+info:
+  title: MiTiR Integration API
+  version: 0.1.0
+paths:
+  /health:
+    get:
+      operationId: getHealth
+      security: []
+      responses:
+        '200':
+          description: MiTiR liveness and readiness
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/Health'}
+  /capabilities:
+    get:
+      operationId: listCapabilities
+      security: [{bearerAuth: []}]
+      responses:
+        '200':
+          description: Available MiTiR capabilities
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [api_version, capabilities]
+                properties:
+                  api_version: {type: string, const: 0.1.0}
+                  capabilities:
+                    type: array
+                    items: {$ref: '#/components/schemas/Capability'}
+        '401': {$ref: '#/components/responses/Unauthorized'}
+  /tasks:
+    post:
+      operationId: createTask
+      security: [{bearerAuth: []}]
+      parameters:
+        - in: header
+          name: Idempotency-Key
+          required: true
+          schema: {type: string, minLength: 1, maxLength: 200}
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: {$ref: '#/components/schemas/TaskRequest'}
+      responses:
+        '202':
+          description: Newly accepted and dispatched task
+          content: {application/json: {schema: {$ref: '#/components/schemas/TaskRecord'}}}
+        '200':
+          description: Existing task returned for an exact idempotent retry
+          content: {application/json: {schema: {$ref: '#/components/schemas/TaskRecord'}}}
+        '400': {$ref: '#/components/responses/BadRequest'}
+        '401': {$ref: '#/components/responses/Unauthorized'}
+        '409':
+          description: idempotency_conflict
+          content: {application/json: {schema: {$ref: '#/components/schemas/ErrorEnvelope'}}}
+  /tasks/{id}:
+    get:
+      operationId: getTask
+      security: [{bearerAuth: []}]
+      parameters: [{$ref: '#/components/parameters/TaskId'}]
+      responses:
+        '200':
+          description: Task state and bounded result/error
+          content: {application/json: {schema: {$ref: '#/components/schemas/TaskRecord'}}}
+        '401': {$ref: '#/components/responses/Unauthorized'}
+        '404': {$ref: '#/components/responses/NotFound'}
+  /tasks/{id}/cancel:
+    post:
+      operationId: cancelTask
+      security: [{bearerAuth: []}]
+      parameters: [{$ref: '#/components/parameters/TaskId'}]
+      responses:
+        '200':
+          description: Idempotent cancellation outcome; terminal tasks remain terminal
+          content: {application/json: {schema: {$ref: '#/components/schemas/TaskRecord'}}}
+        '401': {$ref: '#/components/responses/Unauthorized'}
+        '404': {$ref: '#/components/responses/NotFound'}
+components:
+  securitySchemes:
+    bearerAuth: {type: http, scheme: bearer}
+  parameters:
+    TaskId: {in: path, name: id, required: true, schema: {type: string, format: uuid}}
+  responses:
+    BadRequest:
+      description: Invalid request or unsupported_capability
+      content: {application/json: {schema: {$ref: '#/components/schemas/ErrorEnvelope'}}}
+    Unauthorized:
+      description: Missing or invalid Bearer token
+      content: {application/json: {schema: {$ref: '#/components/schemas/ErrorEnvelope'}}}
+    NotFound:
+      description: Task not found
+      content: {application/json: {schema: {$ref: '#/components/schemas/ErrorEnvelope'}}}
+  schemas:
+    Health:
+      type: object
+      required: [status, component, api_version, ready]
+      properties:
+        status: {type: string, const: ok}
+        component: {type: string, const: secretary}
+        api_version: {type: string, const: 0.1.0}
+        ready: {type: boolean}
+    Capability:
+      type: object
+      required: [id, description, version, available, approval_required, input_schema, output_schema]
+      properties:
+        id: {type: string, enum: [daily.summary, research.summary, trading.context]}
+        description: {type: string}
+        version: {type: string}
+        available: {type: boolean}
+        approval_required: {type: boolean}
+        input_schema: {type: string}
+        output_schema: {type: string}
+    EmptyInput: {type: object, additionalProperties: false}
+    TradingContextInput:
+      type: object
+      properties: {limit: {type: integer, minimum: 1, maximum: 100, default: 5}}
+      additionalProperties: false
+    TaskRequest:
+      type: object
+      required: [capability_id, input]
+      properties:
+        capability_id: {type: string, enum: [daily.summary, research.summary, trading.context]}
+        input: {type: object, additionalProperties: true}
+        correlation_id: {type: string, maxLength: 200}
+        requester: {type: string, maxLength: 200}
+      additionalProperties: false
+    TaskRecord:
+      type: object
+      required: [id, state, capability_id, created_at, updated_at]
+      properties:
+        id: {type: string, format: uuid}
+        capability_id: {type: string}
+        state:
+          type: string
+          enum: [accepted, queued, running, waiting_for_approval, succeeded, failed, cancel_requested, cancelled]
+        correlation_id: {type: [string, 'null']}
+        requester: {type: [string, 'null']}
+        result: {type: [object, 'null'], additionalProperties: true}
+        error: {anyOf: [{$ref: '#/components/schemas/TaskError'}, {type: 'null'}]}
+        created_at: {type: string, format: date-time}
+        updated_at: {type: string, format: date-time}
+        started_at: {type: [string, 'null'], format: date-time}
+        completed_at: {type: [string, 'null'], format: date-time}
+    ErrorEnvelope:
+      type: object
+      required: [error]
+      properties: {error: {$ref: '#/components/schemas/TaskError'}}
+    TaskError:
+      type: object
+      required: [code, message, retryable]
+      properties:
+        code: {type: string}
+        message: {type: string}
+        retryable: {type: boolean}
+        task_id: {type: [string, 'null']}
+        correlation_id: {type: [string, 'null']}
