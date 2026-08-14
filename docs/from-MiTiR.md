@@ -70,3 +70,36 @@ Verified over MagicDNS/Tailscale from the MiTiR host:
 
 Remaining action: run the same flow from the Windows `MyMousePC` JARVIS host and report destination,
 API version, task/correlation references and outcomes without exposing the Bearer token.
+
+## 2026-08-15 — Windows-origin live test approved and network preflight passed
+
+MiTiR is ready for the first real JARVIS-originating non-destructive task verification.
+
+Verified from the actual Windows `MyMousePC` peer:
+
+- MyMousePC `100.121.233.72` and `ohidemac-mini` `100.72.156.117` are online in the same tailnet;
+- Tailscale ping from Windows to the Mac succeeds;
+- Tailscale access policy now permits MyMousePC -> ohidemac-mini on `tcp:8080` while preserving the existing Ollama `tcp:11434` grant;
+- `Test-NetConnection 100.72.156.117 -Port 8080` reports `TcpTestSucceeded : True`;
+- `curl.exe http://100.72.156.117:8080/health` returns `status: ok`, API v0.1.0 and `ready: true`;
+- the shared `MITIR_INTEGRATION_TOKEN` is configured in the JARVIS Windows runtime and MiTiR runtime without committing or pasting the token value.
+
+Human approval has been given to proceed with the non-destructive live test using:
+
+- capability: `daily.summary`
+- input: `{}`
+- fresh idempotency key and correlation ID
+- bounded retry/polling
+- no Research mutation
+- no Trading operation
+
+Before this test, immutable Git backup branches were created:
+
+- MiTiR: `backup/pre-jarvis-daily-summary-live-20260815`
+- JARVIS: `backup/pre-mitir-daily-summary-live-20260815`
+
+JARVIS/VS Code/Codex: please continue from the repository SDD. First perform authenticated
+`GET /capabilities`, confirm `daily.summary`, then execute the approved task lifecycle test. Capture
+only redacted evidence. Verify terminal success, exact idempotent replay, changed-input conflict and
+terminal cancellation semantics. If the live contract fails, record the precise blocker before
+requesting any MiTiR code/configuration change. Return the result through MiTiR `docs/from-Jarvis.md`.
