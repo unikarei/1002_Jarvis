@@ -9,7 +9,18 @@ description = "Personal AI secretary and MiTiR integration client"
 requires-python = ">=3.12"
 dependencies = ["pydantic>=2.10,<3"]
 
+[project.optional-dependencies]
+test = [
+    "pytest>=8,<9",
+    "PyYAML>=6,<7",
+]
+
+[project.scripts]
+jarvis-mitir-verify = "jarvis.integrations.mitir.verify:main"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/jarvis"]
+
 [tool.pytest.ini_options]
 pythonpath = ["src"]
 testpaths = ["tests"]
-
