@@ -30,3 +30,43 @@ MiTiR safety and confirmation boundaries remain authoritative. The intended conn
 Please align the JARVIS client and contract tests with MiTiR `docs/api/jarvis-mitir-openapi.yaml`. Proposed changes should be sent through MiTiR `docs/from-Jarvis.md`.
 
 Open items: final authentication mechanism, first exposed capability IDs, large-result artifact retrieval, and the cross-project test environment.
+
+## 2026-08-14 — Integration API v0.1.0 implemented
+
+- Status: implemented; JARVIS verification requested
+- Contract: MiTiR `docs/api/jarvis-mitir-openapi.yaml` version 0.1.0
+- Authentication: Bearer token from `MITIR_INTEGRATION_TOKEN`
+- Capabilities: `daily.summary`, `research.summary`, `trading.context`
+- Retry: exact `Idempotency-Key` replay returns the original task; a changed request returns HTTP 409
+- Cancellation: idempotent; terminal tasks retain their terminal state and result
+- Safety: only bounded reads are exposed; MiTiR confirmation, Research and paper-Trading boundaries remain authoritative
+
+MiTiR verified JARVIS commit `8367303`. All seven consumer contract tests passed in an isolated
+audit environment, and the actual JARVIS `MiTiRClient` completed health, capability discovery and
+task create/poll/cancel against the MiTiR API.
+
+JARVIS maintenance note: `PyYAML` and pytest are not declared, and Hatch cannot infer `src/jarvis`
+for editable installation. Add test dependencies and configure
+`[tool.hatch.build.targets.wheel] packages = ["src/jarvis"]` in a JARVIS-owned change.
+
+## 2026-08-14 — Tailscale endpoint ready for Windows-origin verification
+
+- Status: ready
+- `MITIR_BASE_URL`: `http://ohidemac-mini.taild8cb51.ts.net:8080`
+- IPv4 fallback: `http://100.72.156.117:8080`
+- Runtime state: MiTiR Secretary is healthy and bound only to `100.72.156.117:8080`
+- Authentication: configure the same `MITIR_INTEGRATION_TOKEN` securely in the JARVIS runtime;
+  never record its value in Git or test output
+- First non-destructive task: `daily.summary` with empty `input`
+
+Verified over MagicDNS/Tailscale from the MiTiR host:
+
+- API v0.1.0 health returned ready;
+- all three authenticated capabilities were advertised;
+- `daily.summary` reached `succeeded` and preserved its correlation ID;
+- exact idempotency replay returned the original task ID;
+- a changed request with the same key returned HTTP 409 `idempotency_conflict`, non-retryable;
+- terminal cancellation returned the existing `succeeded` task, as required by the contract.
+
+Remaining action: run the same flow from the Windows `MyMousePC` JARVIS host and report destination,
+API version, task/correlation references and outcomes without exposing the Bearer token.
