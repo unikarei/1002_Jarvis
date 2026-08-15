@@ -103,3 +103,71 @@ JARVIS/VS Code/Codex: please continue from the repository SDD. First perform aut
 only redacted evidence. Verify terminal success, exact idempotent replay, changed-input conflict and
 terminal cancellation semantics. If the live contract fails, record the precise blocker before
 requesting any MiTiR code/configuration change. Return the result through MiTiR `docs/from-Jarvis.md`.
+
+## 2026-08-15 — Research mutation Integration API v0.2.0 contract ready
+
+- Status: MiTiR implementation and local/private verification complete; JARVIS client sync required
+- Contract source: MiTiR `docs/api/jarvis-mitir-openapi.yaml`, API version `0.2.0`
+- New capability: `research.select_candidates`
+- Existing read capabilities and paths are unchanged
+- Capability metadata: `approval_required: true`
+- No generic command, arbitrary tool, internal endpoint, Research execution/deletion, or Trading
+  mutation is exposed
+
+JARVIS v0.1.0 uses strict literals for the API version and capability IDs. Update those client models
+and contract tests to v0.2.0 before attempting submission. Capability discovery should contain
+exactly the three existing reads plus `research.select_candidates`.
+
+The request `input` is closed and must contain exactly:
+
+```json
+{
+  "proposal_id": "<JARVIS proposal UUID>",
+  "approval_reference": "<non-secret Gate A approval reference, 1..200 characters>",
+  "candidate_ids": ["<current MiTiR Research candidate ID>"]
+}
+```
+
+`candidate_ids` must contain 1..20 unique non-empty IDs, each at most 200 characters. Unknown fields,
+arbitrary topics/prompts/actions, and unknown current candidate IDs are rejected. Do not put an
+approval token, Bearer token, prompt body, or other secret in `approval_reference`.
+
+A valid new submission follows `accepted -> queued -> running -> waiting_for_approval` and returns:
+
+```json
+{
+  "status": "waiting_for_approval",
+  "proposal_id": "<same proposal UUID>",
+  "candidate_ids": ["<same bounded candidate IDs>"],
+  "mitir_confirmation_id": "<MiTiR confirmation UUID>",
+  "expires_at": "<RFC 3339 timestamp>",
+  "next_action": "await_mitir_confirmation_contract"
+}
+```
+
+This state is intentionally non-terminal. JARVIS Gate A approval is provenance only and never
+confirms the MiTiR action. MiTiR v0.2.0 exposes no external confirmation/resume route, so JARVIS must
+stop and display the pending MiTiR confirmation. It must not retry with a new key to bypass that
+boundary. Cancelling the integration task cancels its linked pending MiTiR confirmation before the
+task becomes `cancelled`; no Research selection is changed while blocked or after cancellation.
+
+Exact `Idempotency-Key` replay with the same capability/input returns the original task and does not
+create a second confirmation. Reusing the key with changed input returns non-retryable HTTP 409
+`idempotency_conflict`. Input validation is returned before task acceptance; current-candidate
+validation is persisted as safe `domain_validation_failed`; unexpected internals remain redacted.
+
+Safe future live-test shape (token intentionally omitted):
+
+```text
+POST /tasks
+Idempotency-Key: jarvis-research-select-<fresh-uuid>
+capability_id: research.select_candidates
+input: use one candidate ID obtained from the synchronized, human-reviewed proposal context
+expected state: waiting_for_approval
+```
+
+Do not run that mutation test yet. JARVIS may move its proposal from
+`approved_pending_remote_contract` to client/contract synchronization, but remote submission still
+requires explicit human approval under RM-T10. After approval, verify the waiting state, exact replay,
+cancellation, unchanged Research selection, and absence of Trading activity; return redacted evidence
+through MiTiR `docs/from-Jarvis.md`.
