@@ -5,7 +5,7 @@
 - Phase: Phase 4 controlled mutation integration
 - Specification status: Approved baseline for VS Code/Codex implementation
 - Depends on: completed Phase 3 conversational read integration
-- Current MiTiR external contract: Integration API v0.1.0, read-only capabilities only
+- Current MiTiR external contract: Integration API v0.2.0, including bounded `research.select_candidates`
 - Mutation domain in scope: Research only
 - Trading mutation/order execution: explicitly out of scope
 
@@ -26,13 +26,13 @@ Phase 4 must not bypass MiTiR's own confirmation/safety boundary. JARVIS approva
 
 ## 3. Critical contract gate
 
-At the start of Phase 4, MiTiR Integration API v0.1.0 exposes only:
+MiTiR Integration API v0.2.0 exposes the three read capabilities plus bounded `research.select_candidates`.
 
 - `daily.summary`
 - `research.summary`
 - `trading.context`
 
-Therefore JARVIS MUST NOT call MiTiR internal `/api/research/action` or any undocumented/internal endpoint directly.
+JARVIS MUST NOT call MiTiR internal `/api/research/action` or any undocumented/internal endpoint directly. The only Research mutation capability is `research.select_candidates`; its external confirmation route is not published.
 
 Phase 4 is split into two gates:
 

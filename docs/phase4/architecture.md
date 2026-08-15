@@ -86,7 +86,7 @@ Any new remote mutation adapter must depend on synchronized OpenAPI/typed models
 
 ## 4. Contract evolution
 
-The current v0.1.0 integration contract is read-only at the capability level. Therefore Phase 4 remote execution is contract-first.
+The v0.2.0 integration contract exposes only the bounded `research.select_candidates` mutation. JARVIS may submit it only after Gate A approval and must stop at MiTiR `waiting_for_approval`; no confirmation/resume route is published.
 
 Expected coordination sequence:
 

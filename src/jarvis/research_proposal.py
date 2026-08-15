@@ -15,6 +15,7 @@ class ProposalState(StrEnum):
     EXPIRED = "expired"
     APPROVED_PENDING_REMOTE_CONTRACT = "approved_pending_remote_contract"
     SUBMITTED = "submitted"
+    WAITING_FOR_APPROVAL = "waiting_for_approval"
     SUCCEEDED = "succeeded"
     FAILED = "failed"
     CANCELLED = "cancelled"
@@ -101,6 +102,12 @@ class ResearchProposalService:
     def reject(self, proposal_id: str | None) -> ResearchActionProposal:
         proposal = self._resolve_pending(proposal_id)
         return self._store.transition(proposal.proposal_id, ProposalState.PROPOSED, ProposalState.REJECTED)
+
+    def submitted(self, proposal_id: str) -> ResearchActionProposal:
+        return self._store.transition(proposal_id, ProposalState.APPROVED_PENDING_REMOTE_CONTRACT, ProposalState.SUBMITTED)
+
+    def waiting_for_approval(self, proposal_id: str) -> ResearchActionProposal:
+        return self._store.transition(proposal_id, ProposalState.SUBMITTED, ProposalState.WAITING_FOR_APPROVAL)
 
     def _resolve_pending(self, proposal_id: str | None) -> ResearchActionProposal:
         if proposal_id:
