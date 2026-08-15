@@ -128,12 +128,12 @@ Evidence (2026-08-15): Approved Windows live execution of `jarvis-daily-summary 
 - [x] Update Phase 2 SDD if implementation revealed a justified architecture adjustment.
 - [x] Run `git diff --check` and the full test suite.
 - [x] Review staged files and confirm no secret material.
-- [ ] Ask the user before commit/push.
+- [x] Ask the user before commit/push.
 - [x] Send a MiTiR handoff only if a MiTiR-side contract issue/change is discovered or useful integration evidence should be recorded.
 
 Done when: Phase 2 implementation is reviewable, tested, documented, and ready for user-approved Git backup.
 
-Evidence (2026-08-15): Updated `docs/phase2/architecture.md` to document the deliberately narrow non-secret diagnostic option. Full JARVIS suite: `15 passed in 0.70s`; `git diff --check` and staged-diff check passed. Review covered tracked modifications plus the three new JARVIS source/test files; no token file is tracked, and `.gitignore` excludes token, cache, and `.codex` paths. Prepared a redacted Phase 2 verified-result entry in the permitted MiTiR `docs/from-Jarvis.md` local handoff clone. Commit and push remain pending explicit user approval.
+Evidence (2026-08-15): Updated `docs/phase2/architecture.md` to document the deliberately narrow non-secret diagnostic option. Full JARVIS suite: `15 passed in 0.70s`; `git diff --check` and staged-diff check passed. Review covered tracked modifications plus the three new JARVIS source/test files; no token file is tracked, and `.gitignore` excludes token, cache, and `.codex` paths. Prepared a redacted Phase 2 verified-result entry in the permitted MiTiR `docs/from-Jarvis.md` local handoff clone. After explicit user approval, JARVIS Phase 2 was committed and pushed as `31b5a23`; the MiTiR handoff was committed and pushed as `0a71fc6`.
 
 ## Codex execution rules for Phase 2
 
