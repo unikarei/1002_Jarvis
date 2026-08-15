@@ -1,0 +1,7 @@
+# Local runtime secret; never add the MiTiR integration token to Git.
+mitir-token.env
+
+# Python test artifacts.
+__pycache__/
+.pytest_cache/
+.codex/

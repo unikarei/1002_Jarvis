@@ -54,7 +54,7 @@ def run_verification(
     poll_interval: float = 2.0,
     sleep=time.sleep,
 ) -> VerificationEvidence:
-    """Run only the approved daily.summary empty-input verification workflow."""
+    """Run the approved daily.summary workflow and a rejected non-destructive conflict probe."""
     if max_attempts < 1 or poll_interval < 0:
         raise ValueError("max_attempts must be at least 1 and poll_interval non-negative")
 
@@ -95,8 +95,8 @@ def run_verification(
     try:
         client.create_task(
             TaskRequest(
-                capability_id="daily.summary", input={}, correlation_id=correlation_id,
-                requester="jarvis-phase1-conflict",
+                capability_id="research.summary", input={}, correlation_id=correlation_id,
+                requester="jarvis",
             ),
             idempotency_key=idempotency_key,
         )

@@ -70,7 +70,9 @@ JARVIS shall verify:
 - exact replay with the same `Idempotency-Key` and payload returns the original task ID;
 - a changed request using that key returns HTTP 409 `idempotency_conflict` with `retryable=false`.
 
-The conflict test must remain non-destructive and use only the approved capability/input boundary.
+The conflict test must remain non-destructive. To exercise a contract-relevant change without
+executing another capability, it shall submit `research.summary` with empty input using the
+baseline task's `Idempotency-Key`; the API must reject it with HTTP 409 before dispatch.
 
 ### FR-06 Cancellation semantics
 
@@ -131,4 +133,3 @@ Phase 1 is accepted when all of the following are true:
 
 - How will the user securely obtain the existing `MITIR_INTEGRATION_TOKEN` value on the Windows host without copying it into chat or Git?
 - Should the completed integration test become an opt-in pytest marker or a separate PowerShell/Python verification command? VS Code/Codex should propose the smallest maintainable option before implementation.
-

@@ -58,15 +58,18 @@ class FakeVerificationClient:
 
 
 class VerificationTests(unittest.TestCase):
-    def test_workflow_uses_empty_daily_summary_and_redacted_evidence(self) -> None:
+    def test_workflow_uses_empty_inputs_and_a_rejected_research_conflict_probe(self) -> None:
         client = FakeVerificationClient()
         evidence = run_verification(client, destination="http://mitir.tailnet:8080", poll_interval=0)
         self.assertEqual([request.input for request in client.created], [{}, {}, {}])
-        self.assertEqual([request.capability_id for request in client.created], ["daily.summary"] * 3)
+        self.assertEqual(
+            [request.capability_id for request in client.created],
+            ["daily.summary", "daily.summary", "research.summary"],
+        )
+        self.assertEqual([request.requester for request in client.created], ["jarvis"] * 3)
         self.assertEqual(evidence.final_state, "succeeded")
         self.assertTrue(evidence.exact_replay_same_task_id)
         self.assertEqual(evidence.changed_replay_status, 409)
         self.assertFalse(evidence.changed_replay_retryable)
         self.assertTrue(evidence.terminal_cancel_retained_result)
         self.assertNotIn("token", str(evidence).lower())
-

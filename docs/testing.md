@@ -83,7 +83,8 @@ Do not continue to authenticated task execution if the health response is not re
 - poll with a fixed interval and maximum duration;
 - assert `succeeded` and matching correlation ID;
 - repeat exact request/key and assert same task ID;
-- change the request while retaining the key and assert HTTP 409/non-retryable;
+- submit `research.summary` with empty input while retaining the baseline key and assert HTTP
+  409/non-retryable before any second task is dispatched;
 - cancel the succeeded task and assert it remains succeeded.
 
 ## 7. Evidence format
@@ -128,4 +129,3 @@ After successful verification:
 2. prepare a concise result entry for MiTiR `docs/from-Jarvis.md`;
 3. ask the user before committing or pushing implementation/evidence changes;
 4. do not modify any other MiTiR file.
-
