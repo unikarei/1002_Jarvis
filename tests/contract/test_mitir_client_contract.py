@@ -1,4 +1,4 @@
-"""Consumer contract tests for MiTiR Integration API v0.1.0."""
+"""Consumer contract tests for MiTiR Integration API v0.2.0."""
 
 import json
 import unittest
@@ -118,7 +118,7 @@ class MiTiRClientContractTests(unittest.TestCase):
         contract = yaml.safe_load(
             (Path(__file__).parents[2] / "docs" / "api" / "jarvis-mitir-openapi.yaml").read_text(encoding="utf-8")
         )
-        self.assertEqual(contract["info"]["version"], "0.1.0")
+        self.assertEqual(contract["info"]["version"], "0.2.0")
         self.assertEqual(
             set(contract["paths"]),
             {"/health", "/capabilities", "/tasks", "/tasks/{id}", "/tasks/{id}/cancel"},

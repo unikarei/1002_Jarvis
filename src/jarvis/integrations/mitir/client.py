@@ -1,4 +1,4 @@
-"""Synchronous client for MiTiR Integration API v0.1.0."""
+"""Synchronous client for MiTiR Integration API v0.2.0."""
 
 from __future__ import annotations
 
@@ -183,4 +183,4 @@ class MiTiRClient:
         try:
             return model.model_validate(data)
         except ValidationError as exc:
-            raise MiTiRContractError("MiTiR response does not match API v0.1.0") from exc
+            raise MiTiRContractError("MiTiR response does not match the Integration API contract") from exc

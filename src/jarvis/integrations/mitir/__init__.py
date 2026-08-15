@@ -2,7 +2,7 @@
 
 from .client import MiTiRClient, UrllibTransport
 from .errors import MiTiRAPIError, MiTiRContractError, MiTiRTransportError
-from .models import Capability, CapabilityList, Health, TaskRecord, TaskRequest, TaskState
+from .models import Capability, CapabilityList, Health, ResearchSelectCandidatesInput, TaskRecord, TaskRequest, TaskState, WaitingForApprovalResult
 
 __all__ = [
     "Capability",
@@ -14,6 +14,8 @@ __all__ = [
     "MiTiRTransportError",
     "TaskRecord",
     "TaskRequest",
+    "ResearchSelectCandidatesInput",
+    "WaitingForApprovalResult",
     "TaskState",
     "UrllibTransport",
 ]
