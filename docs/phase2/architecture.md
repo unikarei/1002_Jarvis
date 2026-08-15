@@ -27,6 +27,10 @@ The exact module/class names should follow the current JARVIS repository after i
 - prints/renders the JARVIS result;
 - does not manage Bearer headers, polling, retries, or task JSON directly.
 
+A narrow diagnostic option may expose only non-secret task ID, correlation ID, terminal state,
+and completion time after the normal readable output. It must not expose task JSON, headers, or
+runtime configuration values.
+
 ### Daily Summary use case
 
 Owns the product workflow:

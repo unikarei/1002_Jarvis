@@ -12,7 +12,7 @@ from uuid import UUID
 
 from pydantic import ValidationError
 
-from .errors import MiTiRAPIError, MiTiRTransportError
+from .errors import MiTiRAPIError, MiTiRContractError, MiTiRTransportError
 from .models import CapabilityList, ErrorEnvelope, Health, TaskRecord, TaskRequest
 
 
@@ -162,7 +162,7 @@ class MiTiRClient:
             try:
                 envelope = ErrorEnvelope.model_validate(data)
             except ValidationError as exc:
-                raise MiTiRTransportError(
+                raise MiTiRContractError(
                     f"MiTiR returned HTTP {response.status_code} without a valid error envelope"
                 ) from exc
             raise MiTiRAPIError(response.status_code, envelope.error)
@@ -173,9 +173,9 @@ class MiTiRClient:
         try:
             value = json.loads(body.decode("utf-8"))
         except (UnicodeDecodeError, json.JSONDecodeError) as exc:
-            raise MiTiRTransportError("MiTiR returned invalid JSON") from exc
+            raise MiTiRContractError("MiTiR returned invalid JSON") from exc
         if not isinstance(value, dict):
-            raise MiTiRTransportError("MiTiR returned a non-object JSON response")
+            raise MiTiRContractError("MiTiR returned a non-object JSON response")
         return value
 
     @staticmethod
@@ -183,5 +183,4 @@ class MiTiRClient:
         try:
             return model.model_validate(data)
         except ValidationError as exc:
-            raise MiTiRTransportError("MiTiR response does not match API v0.1.0") from exc
-
+            raise MiTiRContractError("MiTiR response does not match API v0.1.0") from exc

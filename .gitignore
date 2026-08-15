@@ -5,3 +5,4 @@ mitir-token.env
 __pycache__/
 .pytest_cache/
 .codex/
+.codex/

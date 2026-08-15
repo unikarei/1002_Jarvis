@@ -11,6 +11,10 @@ class MiTiRTransportError(MiTiRError):
     """Network or invalid-response failure before a valid API error is received."""
 
 
+class MiTiRContractError(MiTiRError):
+    """Response data that does not conform to the MiTiR API contract."""
+
+
 class MiTiRAPIError(MiTiRError):
     """Structured error returned by MiTiR."""
 
@@ -18,4 +22,3 @@ class MiTiRAPIError(MiTiRError):
         super().__init__(f"MiTiR API error {status_code}: {error.code}: {error.message}")
         self.status_code = status_code
         self.error = error
-
