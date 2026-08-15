@@ -145,11 +145,11 @@ Evidence (2026-08-15): Approved Windows live acceptance used MagicDNS destinatio
 - [x] Run `git diff --check` and full test suite.
 - [x] Review staged files and confirm no secret material.
 - [x] Prepare a concise MiTiR handoff only if useful acceptance evidence or a genuine contract issue should be recorded.
-- [ ] Stop and ask the user before committing or pushing implementation/evidence changes.
+- [x] Stop and ask the user before committing or pushing implementation/evidence changes.
 
 Done when: Phase 3 is tested, documented, reviewable, and ready for explicit user-approved Git publication.
 
-Evidence (2026-08-15): Recorded the actual deterministic router/Secretary/read-only service architecture and redacted live acceptance in this task file. No specification change was required; the Windows legacy-console Unicode rendering defect was an implementation fix, covered by a local test. Full suite: `30 passed in 0.86s`; JARVIS and prepared MiTiR handoff diffs passed `git diff --check`. Secret-bearing diff scan and ignored-path checks are clean. Prepared a concise verified Phase 3 entry in the permitted MiTiR `docs/from-Jarvis.md` local clone. Commit and push remain pending explicit user approval.
+Evidence (2026-08-15): Recorded the actual deterministic router/Secretary/read-only service architecture and redacted live acceptance in this task file. No specification change was required; the Windows legacy-console Unicode rendering defect was an implementation fix, covered by a local test. Full suite: `30 passed in 0.86s`; JARVIS and prepared MiTiR handoff diffs passed `git diff --check`. Secret-bearing diff scan and ignored-path checks are clean. After explicit user approval, JARVIS Phase 3 was committed and pushed as `b05ca54`; the MiTiR handoff was committed and pushed as `7792e09`.
 
 ## Codex execution rules
 
