@@ -15,76 +15,83 @@ Phase 3 is complete. Do not regress the conversational read-only Daily/Research/
 
 ## P4-T0 — Read SDD and inspect current implementation
 
-- [ ] Read `AGENTS.md` and all Phase 4 SDD files.
-- [ ] Inspect the current Phase 3 conversational router/service/presenter code before changing architecture.
-- [ ] Inspect proposal/persistence/state abstractions already present in JARVIS, if any.
-- [ ] Inspect current MiTiR OpenAPI and confirm there is no supported Research mutation capability yet.
-- [ ] Confirm internal MiTiR `/api/research/action` is not a permitted JARVIS integration boundary.
+- [x] Read `AGENTS.md` and all Phase 4 SDD files.
+- [x] Inspect the current Phase 3 conversational router/service/presenter code before changing architecture.
+- [x] Inspect proposal/persistence/state abstractions already present in JARVIS, if any.
+- [x] Inspect current MiTiR OpenAPI and confirm there is no supported Research mutation capability yet.
+- [x] Confirm internal MiTiR `/api/research/action` is not a permitted JARVIS integration boundary.
 
 Done when: Codex reports the smallest implementation plan for Gate A and identifies exact files to extend.
 
 ## P4-T1 — Distinguish Research read vs mutation intent
 
-- [ ] Extend routing to classify Research read and Research mutation separately.
-- [ ] Keep Daily/Trading read behavior unchanged.
-- [ ] Continue to block Trading mutation.
-- [ ] Add deterministic tests for mutation/read/ambiguous examples.
-- [ ] Never translate a mutation request into a read request while claiming it executed.
+- [x] Extend routing to classify Research read and Research mutation separately.
+- [x] Keep Daily/Trading read behavior unchanged.
+- [x] Continue to block Trading mutation.
+- [x] Add deterministic tests for mutation/read/ambiguous examples.
+- [x] Never translate a mutation request into a read request while claiming it executed.
 
 Done when: routing behavior is deterministic and safe without network or LLM.
 
 ## P4-T2 — Add Research Action Proposal model/service
 
-- [ ] Add the smallest JARVIS-owned proposal model required by the spec.
-- [ ] Generate unique non-secret proposal IDs.
-- [ ] Preserve bounded user intent/target/options only.
-- [ ] Start in `proposed` or repository-equivalent state.
-- [ ] Produce a human-readable proposal/effect summary.
-- [ ] Verify proposal creation makes zero remote mutation calls.
+- [x] Add the smallest JARVIS-owned proposal model required by the spec.
+- [x] Generate unique non-secret proposal IDs.
+- [x] Preserve bounded user intent/target/options only.
+- [x] Start in `proposed` or repository-equivalent state.
+- [x] Produce a human-readable proposal/effect summary.
+- [x] Verify proposal creation makes zero remote mutation calls.
 
 Done when: a mutation request can be converted into a reviewable proposal with no side effect.
 
 ## P4-T3 — Implement proposal lifecycle and storage
 
-- [ ] Reuse an existing local store/session abstraction if one exists.
-- [ ] Otherwise implement the smallest clearly documented proposal store consistent with the current CLI/session architecture.
-- [ ] Support lookup, pending state, rejection, expiry/replacement, and transition validation.
-- [ ] Prevent stale/unknown proposal approval.
-- [ ] Ensure invalid transitions fail safely.
+- [x] Reuse an existing local store/session abstraction if one exists.
+- [x] Otherwise implement the smallest clearly documented proposal store consistent with the current CLI/session architecture.
+- [x] Support lookup, pending state, rejection, expiry/replacement, and transition validation.
+- [x] Prevent stale/unknown proposal approval.
+- [x] Ensure invalid transitions fail safely.
 
 Done when: proposal state transitions are explicit and fake-testable.
 
 ## P4-T4 — Add explicit approve/reject conversational path
 
-- [ ] Proposal creation and approval must occur in distinct operations/turns.
-- [ ] Add explicit approval by proposal ID and/or exactly-one-pending-proposal context.
-- [ ] Add explicit reject behavior.
-- [ ] Ambiguous `OK/yes` with zero or multiple proposals must not authorize mutation.
-- [ ] Duplicate approval must be idempotent.
-- [ ] Rejected proposal must never submit remotely.
+- [x] Proposal creation and approval must occur in distinct operations/turns.
+- [x] Add explicit approval by proposal ID and/or exactly-one-pending-proposal context.
+- [x] Add explicit reject behavior.
+- [x] Ambiguous `OK/yes` with zero or multiple proposals must not authorize mutation.
+- [x] Duplicate approval must be idempotent.
+- [x] Rejected proposal must never submit remotely.
 
 Done when: user approval is explicit, auditable at application level, and cannot accidentally execute.
 
 ## P4-T5 — Enforce the external-contract gate
 
-- [ ] Detect that current MiTiR contract has no supported Research mutation capability.
-- [ ] On approval, transition to `approved_pending_remote_contract` or equivalent.
-- [ ] Present a truthful Secretary response explaining that approval is recorded but remote execution is not yet available through the supported external contract.
-- [ ] Add tests proving no internal `/api/research/action` or ad-hoc HTTP call is attempted.
-- [ ] Do not modify MiTiR source/config from JARVIS for convenience.
+- [x] Detect that current MiTiR contract has no supported Research mutation capability.
+- [x] On approval, transition to `approved_pending_remote_contract` or equivalent.
+- [x] Present a truthful Secretary response explaining that approval is recorded but remote execution is not yet available through the supported external contract.
+- [x] Add tests proving no internal `/api/research/action` or ad-hoc HTTP call is attempted.
+- [x] Do not modify MiTiR source/config from JARVIS for convenience.
 
 Done when: Gate A is fully functional and safe even before MiTiR contract extension.
 
 ## P4-T6 — Complete local Gate A verification
 
-- [ ] Run all new routing/proposal/approval tests.
-- [ ] Run full JARVIS regression suite.
-- [ ] Verify Phase 3 conversational reads remain correct.
-- [ ] Verify Trading mutation remains locally blocked.
-- [ ] Run secret/output scan and `git diff --check`.
-- [ ] Record redacted Gate A evidence in this task file.
+- [x] Run all new routing/proposal/approval tests.
+- [x] Run full JARVIS regression suite.
+- [x] Verify Phase 3 conversational reads remain correct.
+- [x] Verify Trading mutation remains locally blocked.
+- [x] Run secret/output scan and `git diff --check`.
+- [x] Record redacted Gate A evidence in this task file.
 
 Done when: Gate A is green and the only blocker is the formal MiTiR mutation contract.
+
+Gate A evidence (local only, 2026-08-15):
+
+- Proposal state before decision: `proposed`; approved state: `approved_pending_remote_contract`.
+- Remote mutation submitted: no (proposal lifecycle has no transport/client dependency).
+- Tests: `pytest -q` — 37 passed; `git diff --check` — passed.
+- Blocker: MiTiR Integration API v0.1.0 has no accepted external Research mutation capability. P4-T7 onward remains blocked.
 
 ## P4-T7 — Coordinate MiTiR contract extension
 

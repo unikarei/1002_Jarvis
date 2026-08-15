@@ -40,6 +40,15 @@ class SecretaryServiceTests(unittest.TestCase):
             with self.subTest(message=message): self.service.respond(message)
         self.assertEqual((self.daily.calls, self.research.calls, self.trading.calls), (0, 0, 0))
 
+    def test_research_proposal_and_separate_approval_never_call_read_specialists(self):
+        proposed = self.service.respond("Start Research on battery recycling")
+        self.assertEqual(proposed.domain, ConversationIntent.RESEARCH_MUTATION)
+        proposal_id = next(line.split(": ", 1)[1] for line in proposed.text.splitlines() if line.startswith("Proposal ID:"))
+        approved = self.service.respond(f"approve {proposal_id}")
+        self.assertEqual(approved.terminal_state, "approved_pending_remote_contract")
+        self.assertIn("Remote execution is unavailable", approved.text)
+        self.assertEqual((self.daily.calls, self.research.calls, self.trading.calls), (0, 0, 0))
+
     def test_trading_response_preserves_read_only_mode_without_claiming_execution(self):
         response = self.service.respond("Trading status")
         self.assertIn("Mode: paper (read-only context)", response.text)
