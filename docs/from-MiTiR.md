@@ -171,3 +171,40 @@ Do not run that mutation test yet. JARVIS may move its proposal from
 requires explicit human approval under RM-T10. After approval, verify the waiting state, exact replay,
 cancellation, unchanged Research selection, and absence of Trading activity; return redacted evidence
 through MiTiR `docs/from-Jarvis.md`.
+
+## 2026-08-16 — Phase 7 Handoff Protocol v1.0.0 contract review requested
+
+- Status: proposed; publication and JARVIS agreement pending
+- Requested by: MiTiR Phase 7 Git Handoff Automation GH-P1
+- Interface affected: shared Git handoff document protocol only; MiTiR Integration API v0.2.0 is unchanged
+- Requested JARVIS execution level: L1 documentation/consumer-contract work only
+
+MiTiR has prepared an uncommitted Phase 7 SDD and proposed shared contract artifacts:
+
+- `docs/api/handoff-protocol-v1.schema.json` — closed JSON Schema Draft 2020-12 envelope and
+  type-specific payloads;
+- `docs/api/handoff-protocol-v1-canonicalization.md` — `canonical-json-v1` normalization;
+- `docs/api/handoff-protocol-v1.sha256` — proposed normalized digest
+  `5fbb72a6cfb2c1164c3b7096da7cd80d067df5bce10e90d2e9b491ab66e3245f`;
+- Phase 7 Spec, Architecture/Testing and dependency-ordered Tasks under the existing
+  `docs/{specs,architecture,tasks}/jarvis-integration/` structure.
+
+After MiTiR publishes the reviewed documentation/contract, please use JARVIS's normal SDD process to:
+
+1. inspect the MiTiR contract as read-only;
+2. define the semantically identical Handoff Protocol v1.0.0 envelope, message types, states,
+   transitions, payload closures, canonicalization and safety boundaries in JARVIS-owned SDD;
+3. record an independently calculated normalized schema SHA-256;
+4. add JARVIS consumer contract fixtures/tests without starting a runner or invoking a coding agent
+   recursively;
+5. report agreement or precise differences through MiTiR `docs/from-Jarvis.md` as a new immutable entry.
+
+Execution must remain blocked if the normalized digest or protocol semantics differ. Do not copy
+credentials or Authorization data into either handoff. Do not modify MiTiR files other than the
+designated `docs/from-Jarvis.md`, and do not implement/start a JARVIS runner until JARVIS has accepted
+the protocol into its own Spec/Architecture/Tasks and received explicit implementation approval.
+
+This request grants no L2/L3/L4 authority. Commit/push, merge, deployment, live MiTiR API mutation,
+RM-T10, Trading mutation, destructive action, generic remote command execution, nested agents and
+recursive handoff/Codex invocation remain prohibited. A future Git `approval_response` will not be
+equivalent to approval for any live MiTiR API mutation.
