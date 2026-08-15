@@ -2,111 +2,131 @@
 
 ## Current milestone
 
-Phase 1 — Windows-origin Tailscale integration with MiTiR API v0.1.0
+Phase 2 — Operational Daily Summary via MiTiR
 
 Status: **Ready for VS Code/Codex implementation**
 
-## User actions before implementation/test
+Primary SDD:
 
-- [x] On Windows `MyMousePC`, run `git status` and confirm whether local changes exist.
-- [x] Pull this SDD baseline with `git pull origin main` after the worktree is safe.
-- [x] Confirm Mac mini `ohidemac-mini` and MiTiR Secretary are running.
-- [x] Confirm Windows and Mac mini are connected to the same Tailscale network.
-- [x] Confirm Windows can reach `ohidemac-mini` over Tailscale.
-- [x] Securely configure the existing `MITIR_INTEGRATION_TOKEN` for the JARVIS runtime; never paste it into chat or Git.
-- [x] Approve the non-destructive live test using `daily.summary` with empty input.
+- `docs/phase2/spec.md`
+- `docs/phase2/architecture.md`
+- `docs/phase2/testing.md`
+- `docs/api/jarvis-mitir-openapi.yaml`
+- `docs/from-MiTiR.md`
 
-Evidence (2026-08-14): On Windows `MyMousePC`, `tailscale status --json` reported BackendState `Running`, MagicDNS enabled for `taild8cb51.ts.net`, and the Mac mini peer `ohidemac-mini.taild8cb51.ts.net` / `100.72.156.117` online in the same tailnet. No credentials or personal identifiers were recorded.
+## Phase 1 closure
 
-## Implementation tasks for VS Code/Codex
+Phase 1 Windows-origin Tailscale integration is complete.
 
-### T1 — Read SDD baseline
+Verified on 2026-08-15:
 
-- [x] Read all documents required by `AGENTS.md`.
-- [x] Inspect current Git status and existing client/tests.
-- [x] Confirm no requirement conflicts with OpenAPI v0.1.0.
+- Windows `MyMousePC` reached MiTiR Secretary on the Mac mini through Tailscale;
+- `/health` returned ready/API `0.1.0`;
+- Bearer authentication succeeded;
+- `daily.summary` completed successfully;
+- exact idempotent replay returned the same task;
+- changed same-key request returned HTTP 409 `idempotency_conflict`;
+- terminal cancellation retained the successful result;
+- redacted verification was handed to MiTiR `docs/from-Jarvis.md`;
+- JARVIS Phase 1 implementation and SDD are committed on `main`.
 
-Done when: implementation plan cites the relevant requirements and acceptance criteria.
+Do not repeat Phase 1 work unless a regression is found.
 
-Evidence (2026-08-14): Reviewed the mandatory SDD documents and OpenAPI v0.1.0. The client/models and seven consumer contract tests align with FR-01 through FR-07 and the specified OpenAPI SHA. Worktree contained only untracked `.codex/`, which is preserved and out of scope.
+## Phase 2 implementation tasks for VS Code/Codex
 
-### T2 — Repair packaging/test declarations
+### P2-T0 — Read SDD and inspect current architecture
 
-- [x] Add pytest and PyYAML as test/development dependencies using the smallest maintainable project configuration.
-- [x] Configure Hatch wheel packaging for `src/jarvis`.
-- [x] Verify clean installation/import under Python 3.12.
+- [ ] Read `AGENTS.md` and every Phase 2 document listed above.
+- [ ] Inspect the existing JARVIS source tree before proposing new folders/classes.
+- [ ] Inspect the current `MiTiRClient`, models, errors, verification command, CLI/application entry points, and tests.
+- [ ] Identify the smallest existing boundary suitable for a reusable daily-summary use case.
+- [ ] Confirm the implementation does not require a MiTiR API change.
 
-Done when: a clean environment can install the project/test dependencies and import `jarvis`.
+Done when: Codex reports a short implementation plan naming the existing modules it will extend and the acceptance criteria it will satisfy.
 
-Evidence (2026-08-14): In an isolated Python 3.12.10 virtual environment, `pip install -e '.[test]'` completed and `import jarvis` succeeded. No secrets were supplied or emitted.
+### P2-T1 — Add a JARVIS-owned Daily Summary use case
 
-### T3 — Preserve existing consumer contract coverage
+- [ ] Add or extend an application/service boundary equivalent to `get_daily_summary()`.
+- [ ] Reuse the existing typed `MiTiRClient`; do not create another HTTP stack.
+- [ ] Submit only `daily.summary` with empty input.
+- [ ] Use a fresh correlation ID and idempotency key for each user request.
+- [ ] Poll with a bounded policy and accept only terminal `succeeded` as success.
+- [ ] Keep task/correlation references available as safe diagnostics.
 
-- [x] Run all seven existing contract tests.
-- [x] Fix only configuration or genuine defects required by the approved specification.
-- [x] Confirm OpenAPI snapshot remains aligned with blob SHA `fbd3b806c7e386e48428df8e051f660d342f38aa`.
+Done when: product/application code can request a Daily Summary without knowing MiTiR HTTP endpoints or task lifecycle details.
 
-Done when: all existing contract tests pass without secrets or network dependency.
+### P2-T2 — Define stable JARVIS result and failure mapping
 
-Evidence (2026-08-14): Isolated environment command `python -m pytest -q` reported `7 passed in 1.05s`. `git hash-object docs/api/jarvis-mitir-openapi.yaml` returned `fbd3b806c7e386e48428df8e051f660d342f38aa`. The test run used only fake transport and no credentials or network access.
+- [ ] Map the MiTiR domain-summary result into a JARVIS-owned result model.
+- [ ] Preserve reporting date/time, headline/summary, important items, alerts/actions, and source references when present.
+- [ ] Do not invent absent fields.
+- [ ] Map configuration, unreachable, not-ready, unauthorized, capability-unavailable, timeout, task-failed, and contract errors into stable JARVIS categories.
+- [ ] Ensure normal errors do not expose Authorization/token values or raw tracebacks.
 
-### T4 — Implement opt-in live verification
+Done when: callers consume a stable JARVIS contract rather than a raw MiTiR task record.
 
-- [x] Propose the smallest maintainable form: a dedicated integration test marker or a separate verification command.
-- [x] Require `MITIR_BASE_URL` and `MITIR_INTEGRATION_TOKEN` at runtime.
-- [x] Skip/fail clearly when prerequisites are absent; never run automatically in ordinary unit tests.
-- [x] Implement bounded polling, retry, redaction, and evidence capture.
-- [x] Cover the workflow defined in `docs/testing.md`.
+### P2-T3 — Add the smallest user-accessible entry point
 
-Done when: the live test is opt-in, safe, bounded, and produces redacted evidence.
+- [ ] Inspect existing CLI/application entry points first.
+- [ ] Extend an existing entry point if suitable; otherwise add one narrow command for Daily Summary.
+- [ ] Default output must be human-readable, not raw task JSON.
+- [ ] Preserve an explicit developer/diagnostic option only if it is small and justified.
+- [ ] Keep the design callable by a future conversational JARVIS layer.
 
-Evidence (2026-08-14): Added the opt-in `jarvis-mitir-verify` command. It accepts bounded polling options and requires both runtime environment variables before any request. The baseline uses only `daily.summary` with `{}`; its same-key conflict probe uses `research.summary` with `{}` and must be rejected before dispatch. The emitted JSON includes destination and task evidence but never token/header values. Isolated test run: `8 passed in 0.84s`; command help and missing-environment guard were also verified without a live request.
+Done when: from Windows/VS Code, the user can execute one clear command/path and read the current Daily Intelligence summary.
 
-Evidence (2026-08-15): The first approved live run reached MiTiR, authenticated successfully, and passed through exact idempotent replay. It stopped only because the prior conflict probe changed `requester`, which MiTiR does not use for idempotency identity. The probe now changes the contract-relevant `capability_id` to `research.summary` with empty input; local regression test result after the correction: `8 passed in 1.18s`. A fresh live run is required to record final redacted evidence.
+### P2-T4 — Unit and regression tests
 
-### T5 — Run Windows-origin preflight
+- [ ] Add fake-driven tests for successful mapping.
+- [ ] Test missing optional fields without fabricated content.
+- [ ] Test all major failure mappings defined in Phase 2 spec.
+- [ ] Test user-facing presentation separately from transport/task mechanics where practical.
+- [ ] Run the entire JARVIS test suite.
+- [ ] Confirm Phase 1 verification/contract tests continue to pass.
 
-- [x] Verify Tailscale status and MagicDNS ping.
-- [x] Verify TCP port 8080.
-- [x] Verify `/health` returns ready/API v0.1.0.
-- [x] Use IPv4 fallback only if MagicDNS fails, and record which route was used.
+Done when: ordinary tests require no MiTiR network or secret and the full suite is green.
 
-Done when: Windows `MyMousePC` reaches the actual MiTiR Secretary through Tailscale.
+### P2-T5 — Secret/configuration hygiene
 
-Evidence (2026-08-14): MagicDNS resolved `ohidemac-mini.taild8cb51.ts.net` to the expected private address `100.72.156.117`, but `Test-NetConnection` from Windows reported TCP port 8080 unreachable. The prerequisite is therefore not complete. Per `docs/spec.md`, the IPv4 fallback was not attempted because MagicDNS resolution itself succeeded. No `/health` or authenticated requests were made after this failure.
+- [ ] Continue to read `MITIR_BASE_URL` and `MITIR_INTEGRATION_TOKEN` from runtime configuration.
+- [ ] Do not add token values or secret-bearing `.env` files to Git.
+- [ ] Confirm `.gitignore` still excludes `mitir-token.env`, local caches, and `.codex/`.
+- [ ] Search staged diff/output for accidental `Authorization`, `Bearer`, or token leakage before commit.
 
-Evidence (2026-08-15): MiTiR handoff confirms Windows `MyMousePC` and `ohidemac-mini` are online in the same tailnet; Tailscale ping succeeded; `Test-NetConnection 100.72.156.117 -Port 8080` succeeded; and `/health` returned `ok`, API `0.1.0`, ready `true`. MagicDNS remained available, so no IPv4 fallback was used.
+Done when: Phase 2 can run locally without adding any secret material to source control.
 
-### T6 — Run live end-to-end test
+### P2-T6 — Explicit Windows live acceptance
 
-- [x] Discover capabilities.
-- [x] Run `daily.summary` with empty input.
-- [x] Verify correlation ID and terminal success.
-- [x] Verify exact idempotent replay.
-- [x] Verify changed replay conflict.
-- [x] Verify terminal cancellation semantics.
+Prerequisite: user approval before the real request.
 
-Done when: every acceptance criterion in `docs/spec.md` is satisfied or a precise blocker is recorded.
+- [ ] Confirm MiTiR `/health` is ready from `MyMousePC`.
+- [ ] Run the new user-facing Daily Summary path against the real MiTiR Secretary.
+- [ ] Verify the result came from `daily.summary` and reached terminal success.
+- [ ] Verify the displayed output is readable and not raw task JSON.
+- [ ] Record API version, task ID, correlation ID, terminal state, timestamp, and destination without secrets.
+- [ ] If a defect is found, fix it through SDD/code/tests and rerun the full suite.
 
-Evidence (2026-08-15): Initial live execution reached MiTiR and authenticated successfully but stopped at the changed-idempotent-replay assertion. The cause was a JARVIS verifier defect: changing `requester` was not a contract-relevant request change. The verifier now uses the rejected `research.summary` empty-input probe under the same key; rerun is pending to capture task and correlation references without secrets.
+Done when: the first actual JARVIS product feature consumes MiTiR successfully from Windows.
 
-Evidence (2026-08-15): Corrected live command completed over MagicDNS. API `0.1.0`; health ready; capabilities `daily.summary`, `research.summary`, `trading.context`; task `938c50ec-6985-48f2-9c37-d2d32046c258`; correlation `jarvis-phase1-1bdf5890-ee4f-406f-9881-6c6a4eee1dc8`; final state `succeeded`; exact replay returned the same task; changed replay returned HTTP 409 `idempotency_conflict`, `retryable=false`; terminal cancellation returned `succeeded` with result retained. Timestamp: `2026-08-15T00:08:40.725919+00:00`. No token or Authorization data was recorded.
+### P2-T7 — Documentation, review, and handoff
 
-### T7 — Report and hand off
+- [ ] Update this task file with redacted evidence.
+- [ ] Update Phase 2 SDD if implementation revealed a justified architecture adjustment.
+- [ ] Run `git diff --check` and the full test suite.
+- [ ] Review staged files and confirm no secret material.
+- [ ] Ask the user before commit/push.
+- [ ] Send a MiTiR handoff only if a MiTiR-side contract issue/change is discovered or useful integration evidence should be recorded.
 
-- [x] Redact all evidence.
-- [x] Update this task list with result references.
-- [x] Prepare the result for MiTiR `docs/from-Jarvis.md`.
-- [x] Ask the user before commit/push.
+Done when: Phase 2 implementation is reviewable, tested, documented, and ready for user-approved Git backup.
 
-Done when: MiTiR can review the result without any secret exposure.
+## Codex execution rules for Phase 2
 
-Evidence (2026-08-15): Prepared a `verified` entry in the permitted MiTiR handoff file `docs/from-Jarvis.md`, in a local temporary clone of `unikarei/MiTiR-BASE`. It records the redacted Windows-origin outcome, task/correlation references, replay/conflict/cancellation semantics, and `8 passed` local regression result. `git diff --check` passed. After explicit user approval, only that file was committed and pushed to MiTiR `main` as `f963962` (`docs: record JARVIS Phase 1 verification`).
-
-## Prohibited in this milestone
-
-- [ ] Do not modify MiTiR source or configuration.
-- [ ] Do not expose MiTiR publicly.
-- [ ] Do not test trading operations.
-- [ ] Do not begin unrelated JARVIS feature development.
-- [ ] Do not commit or push implementation work without explicit user approval.
+- Work through `P2-T0` → `P2-T7`; parallelize unit-test/result-model work where safe, but do not skip SDD inspection.
+- Prefer extending current code over creating a second architecture.
+- Do not modify MiTiR source/configuration for convenience.
+- Do not expose MiTiR publicly.
+- Do not execute Research or Trading features as part of Phase 2 acceptance.
+- Do not add voice/UI frameworks in this phase.
+- Do not silently fabricate fallback data when MiTiR is unavailable.
+- Do not commit or push implementation changes until the user explicitly approves.
+- After each meaningful implementation increment, report changed files, tests run, result, and the next task.
