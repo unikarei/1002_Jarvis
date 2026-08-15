@@ -18,6 +18,7 @@ test = [
 [project.scripts]
 jarvis-mitir-verify = "jarvis.integrations.mitir.verify:main"
 jarvis-daily-summary = "jarvis.integrations.mitir.daily_summary_cli:main"
+jarvis-chat = "jarvis.chat_cli:main"
 
 [tool.hatch.build.targets.wheel]
 packages = ["src/jarvis"]
