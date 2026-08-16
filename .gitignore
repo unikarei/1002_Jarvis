@@ -5,4 +5,7 @@ mitir-token.env
 __pycache__/
 .pytest_cache/
 .codex/
+.jarvis-handoff/
+.handoff-mitir/
+.handoff-jarvis-monitor/
 .codex/

@@ -1,0 +1,271 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://mitir.local/contracts/handoff-protocol/1.0.0",
+  "title": "Handoff Protocol v1.0.0 message envelope",
+  "type": "object",
+  "required": [
+    "protocol_version",
+    "message_id",
+    "correlation_id",
+    "created_at",
+    "sender",
+    "recipient",
+    "type",
+    "status",
+    "reply_to",
+    "execution_level",
+    "requires_approval",
+    "expires_at",
+    "max_hops",
+    "payload",
+    "prohibited_actions",
+    "artifacts"
+  ],
+  "properties": {
+    "protocol_version": {"const": "1.0.0"},
+    "message_id": {"type": "string", "format": "uuid"},
+    "correlation_id": {"type": "string", "format": "uuid"},
+    "created_at": {"type": "string", "format": "date-time"},
+    "sender": {"enum": ["jarvis", "mitir"]},
+    "recipient": {"enum": ["jarvis", "mitir"]},
+    "type": {
+      "enum": [
+        "implementation_request",
+        "documentation_request",
+        "review_request",
+        "status_response",
+        "result_response",
+        "approval_request",
+        "approval_response",
+        "cancellation_request",
+        "error_response"
+      ]
+    },
+    "status": {
+      "enum": [
+        "requested",
+        "accepted",
+        "in_progress",
+        "blocked",
+        "approval_required",
+        "completed",
+        "failed",
+        "cancelled",
+        "rejected"
+      ]
+    },
+    "reply_to": {
+      "oneOf": [
+        {"type": "string", "format": "uuid"},
+        {"type": "null"}
+      ]
+    },
+    "execution_level": {"enum": ["L0", "L1", "L2", "L3", "L4"]},
+    "requires_approval": {"type": "boolean"},
+    "expires_at": {"type": "string", "format": "date-time"},
+    "max_hops": {"type": "integer", "minimum": 1, "maximum": 8},
+    "payload": {"type": "object"},
+    "prohibited_actions": {
+      "type": "array",
+      "uniqueItems": true,
+      "maxItems": 32,
+      "items": {"$ref": "#/$defs/prohibitedAction"}
+    },
+    "artifacts": {
+      "type": "array",
+      "maxItems": 32,
+      "items": {"$ref": "#/$defs/artifactReference"}
+    }
+  },
+  "additionalProperties": false,
+  "allOf": [
+    {
+      "if": {"properties": {"sender": {"const": "jarvis"}}, "required": ["sender"]},
+      "then": {"properties": {"recipient": {"const": "mitir"}}}
+    },
+    {
+      "if": {"properties": {"sender": {"const": "mitir"}}, "required": ["sender"]},
+      "then": {"properties": {"recipient": {"const": "jarvis"}}}
+    },
+    {
+      "if": {"properties": {"type": {"enum": ["implementation_request", "documentation_request", "review_request"]}}, "required": ["type"]},
+      "then": {"properties": {"payload": {"$ref": "#/$defs/workRequestPayload"}}}
+    },
+    {
+      "if": {"properties": {"type": {"const": "status_response"}}, "required": ["type"]},
+      "then": {"properties": {"payload": {"$ref": "#/$defs/statusPayload"}}}
+    },
+    {
+      "if": {"properties": {"type": {"const": "result_response"}}, "required": ["type"]},
+      "then": {"properties": {"payload": {"$ref": "#/$defs/resultPayload"}}}
+    },
+    {
+      "if": {"properties": {"type": {"const": "approval_request"}}, "required": ["type"]},
+      "then": {"properties": {"payload": {"$ref": "#/$defs/approvalRequestPayload"}}}
+    },
+    {
+      "if": {"properties": {"type": {"const": "approval_response"}}, "required": ["type"]},
+      "then": {"properties": {"payload": {"$ref": "#/$defs/approvalResponsePayload"}}}
+    },
+    {
+      "if": {"properties": {"type": {"const": "cancellation_request"}}, "required": ["type"]},
+      "then": {"properties": {"payload": {"$ref": "#/$defs/cancellationPayload"}}}
+    },
+    {
+      "if": {"properties": {"type": {"const": "error_response"}}, "required": ["type"]},
+      "then": {"properties": {"payload": {"$ref": "#/$defs/errorPayload"}}}
+    }
+  ],
+  "$defs": {
+    "boundedText": {"type": "string", "minLength": 1, "maxLength": 2000},
+    "relativePath": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 500,
+      "pattern": "^(?!/)(?!.*(?:^|/)\\.\\.(?:/|$))(?!.*\\\\).+$"
+    },
+    "stringList": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 64,
+      "uniqueItems": true,
+      "items": {"$ref": "#/$defs/boundedText"}
+    },
+    "pathList": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 64,
+      "uniqueItems": true,
+      "items": {"$ref": "#/$defs/relativePath"}
+    },
+    "prohibitedAction": {
+      "enum": [
+        "commit",
+        "push",
+        "direct_push_main",
+        "force_push",
+        "merge",
+        "deployment",
+        "live_api_mutation",
+        "rm_t10",
+        "trading_mutation",
+        "destructive_action",
+        "external_message",
+        "other_repository_write",
+        "generic_remote_command",
+        "recursive_agent",
+        "recursive_handoff_runner"
+      ]
+    },
+    "artifactReference": {
+      "type": "object",
+      "required": ["kind", "reference", "sha256"],
+      "properties": {
+        "kind": {"enum": ["document", "diff", "test_report", "commit", "log_summary"]},
+        "reference": {"$ref": "#/$defs/relativePath"},
+        "sha256": {
+          "oneOf": [
+            {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+            {"type": "null"}
+          ]
+        }
+      },
+      "additionalProperties": false
+    },
+    "workRequestPayload": {
+      "type": "object",
+      "required": ["objective", "scope_paths", "sdd_references", "acceptance_criteria", "required_tests"],
+      "properties": {
+        "objective": {"$ref": "#/$defs/boundedText"},
+        "scope_paths": {"$ref": "#/$defs/pathList"},
+        "sdd_references": {"$ref": "#/$defs/pathList"},
+        "acceptance_criteria": {"$ref": "#/$defs/stringList"},
+        "required_tests": {"$ref": "#/$defs/stringList"}
+      },
+      "additionalProperties": false
+    },
+    "statusPayload": {
+      "type": "object",
+      "required": ["summary", "processing_state", "attempt_count"],
+      "properties": {
+        "summary": {"$ref": "#/$defs/boundedText"},
+        "processing_state": {"enum": ["accepted", "in_progress", "blocked", "approval_required"]},
+        "attempt_count": {"type": "integer", "minimum": 0, "maximum": 20},
+        "blocker": {"oneOf": [{"$ref": "#/$defs/boundedText"}, {"type": "null"}]}
+      },
+      "additionalProperties": false
+    },
+    "resultPayload": {
+      "type": "object",
+      "required": ["summary", "changed_paths", "test_summary", "resulting_commit_sha"],
+      "properties": {
+        "summary": {"$ref": "#/$defs/boundedText"},
+        "changed_paths": {"type": "array", "maxItems": 128, "uniqueItems": true, "items": {"$ref": "#/$defs/relativePath"}},
+        "test_summary": {"$ref": "#/$defs/boundedText"},
+        "resulting_commit_sha": {
+          "oneOf": [
+            {"type": "string", "pattern": "^[0-9a-f]{40,64}$"},
+            {"type": "null"}
+          ]
+        }
+      },
+      "additionalProperties": false
+    },
+    "approvalRequestPayload": {
+      "type": "object",
+      "required": ["action", "reason", "requested_execution_level"],
+      "properties": {
+        "action": {"$ref": "#/$defs/boundedText"},
+        "reason": {"$ref": "#/$defs/boundedText"},
+        "requested_execution_level": {"enum": ["L0", "L1", "L2", "L3", "L4"]}
+      },
+      "additionalProperties": false
+    },
+    "approvalResponsePayload": {
+      "type": "object",
+      "required": ["decision", "approved_message_id", "constraints"],
+      "properties": {
+        "decision": {"enum": ["approved", "rejected"]},
+        "approved_message_id": {"type": "string", "format": "uuid"},
+        "constraints": {"type": "array", "maxItems": 32, "uniqueItems": true, "items": {"$ref": "#/$defs/boundedText"}}
+      },
+      "additionalProperties": false
+    },
+    "cancellationPayload": {
+      "type": "object",
+      "required": ["target_message_id", "reason"],
+      "properties": {
+        "target_message_id": {"type": "string", "format": "uuid"},
+        "reason": {"$ref": "#/$defs/boundedText"}
+      },
+      "additionalProperties": false
+    },
+    "errorPayload": {
+      "type": "object",
+      "required": ["code", "message", "retryable"],
+      "properties": {
+        "code": {
+          "enum": [
+            "invalid_message",
+            "expired",
+            "protocol_mismatch",
+            "protocol_conflict",
+            "policy_rejected",
+            "approval_required",
+            "cancelled",
+            "transport",
+            "timeout",
+            "git_conflict",
+            "agent_failed",
+            "test_failed",
+            "recovery_required",
+            "internal"
+          ]
+        },
+        "message": {"$ref": "#/$defs/boundedText"},
+        "retryable": {"type": "boolean"}
+      },
+      "additionalProperties": false
+    }
+  }
+}
