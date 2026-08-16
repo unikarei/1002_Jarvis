@@ -132,6 +132,8 @@ Done when: implementation is reviewable and safe for live testing.
 
 Evidence (2026-08-16): local fake/contract suite `pytest -q` passed `70 passed`; Phase 1 through Phase 4 tests remained green. `git diff --check` and the changed-file secret-format scan passed. No live request, confirmation/resume call, internal endpoint, RM-T10 action, or Trading mutation occurred.
 
+Correction (2026-08-16): the P4-T9 checklist criteria are complete. After response-binding validation was added, `pytest -q` passed `72 passed`, affected consumer tests passed `15 passed`, and the same diff/secret checks remained clean. The unchecked checklist markers above are superseded by this evidence pending a documentation-only normalization.
+
 ## P4-T10 — Explicit Windows live Research mutation acceptance
 
 Prerequisites:

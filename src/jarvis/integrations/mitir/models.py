@@ -74,10 +74,16 @@ class ResearchSelectCandidatesInput(StrictModel):
 class WaitingForApprovalResult(StrictModel):
     status: Literal["waiting_for_approval"]
     proposal_id: UUID
-    candidate_ids: list[str]
+    candidate_ids: list[str] = Field(min_length=1, max_length=20)
     mitir_confirmation_id: UUID
     expires_at: datetime
     next_action: Literal["await_mitir_confirmation_contract"]
+
+    def model_post_init(self, __context: Any) -> None:
+        if any(not candidate_id or len(candidate_id) > 200 for candidate_id in self.candidate_ids):
+            raise ValueError("candidate_ids must be non-empty and at most 200 characters")
+        if len(set(self.candidate_ids)) != len(self.candidate_ids):
+            raise ValueError("candidate_ids must be unique")
 
 
 class TaskError(StrictModel):

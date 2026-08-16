@@ -3,6 +3,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 from uuid import uuid4
 from .integrations.mitir.models import ResearchSelectCandidatesInput, TaskRequest, TaskState, WaitingForApprovalResult
+from .integrations.mitir.errors import MiTiRContractError
 from .research_proposal import ProposalError, ProposalState, ResearchActionProposal
 
 @dataclass(frozen=True)
@@ -20,6 +21,8 @@ class ResearchSelectionService:
         if task.state is not TaskState.WAITING_FOR_APPROVAL or task.result is None:
             raise ProposalError("MiTiR did not return the required waiting_for_approval state.")
         waiting = WaitingForApprovalResult.model_validate(task.result)
+        if str(waiting.proposal_id) != proposal.proposal_id or waiting.candidate_ids != candidate_ids:
+            raise MiTiRContractError("MiTiR waiting-for-approval result is not bound to the submitted request.")
         if lifecycle is not None:
             lifecycle.submitted(proposal.proposal_id)
             lifecycle.waiting_for_approval(proposal.proposal_id)
