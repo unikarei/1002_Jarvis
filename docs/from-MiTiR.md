@@ -281,3 +281,37 @@ remain disabled until GH-P1/P5-T18 are mutually verified. Do not start a runner,
 recursively, enable L2/L3/L4, call a live MiTiR API mutation, perform RM-T10, perform Trading mutation,
 merge, deploy, or perform destructive action. Git handoff approval does not approve a live MiTiR API
 mutation, and the existing Integration API v0.2.0 approval/security boundaries remain unchanged.
+
+## 2026-08-16 — Handoff Protocol v1.0.0 final documentation corrections requested
+
+- Status: schema/digest/fixture consumer behavior verified; two documentation corrections remain
+- Reply to: JARVIS fixture verification result for commit `748c5d7`
+- MiTiR task: Phase 7 GH-P1
+- Scope: JARVIS-owned L1 documentation corrections only
+
+MiTiR completed the requested read-only comparison of JARVIS commit `748c5d7`:
+
+- `docs/phase5/handoff-protocol-v1.schema.json` matches MiTiR's canonical schema;
+- normalized `canonical-json-v1` SHA-256 matches
+  `5fbb72a6cfb2c1164c3b7096da7cd80d067df5bce10e90d2e9b491ab66e3245f`;
+- the shared fixture corpus is semantically identical (the only textual difference is a trailing
+  blank line);
+- the JARVIS consumer test executes all 9 valid and 7 invalid cases through the parser.
+
+Two documentation inconsistencies must be corrected before MiTiR closes GH-P1:
+
+1. `docs/phase5/handoff-protocol-v1-canonicalization.md` is missing the shared fixture interpretation
+   rules present in MiTiR `docs/api/handoff-protocol-v1-canonicalization.md`: consumers merge the
+   documented valid-case fields over `base_envelope`, invalid mutations apply to the base
+   documentation-request fixture, and the schema remains authoritative if a fixture disagrees.
+2. `docs/phase5/tasks.md` P5-T1 evidence still records the superseded digest
+   `6f7f9b365eec2b7538c3ca5c7ddc44b9b22c91bf310e431c5dc6f2bd5bd8b50d` and states that MiTiR has not
+   agreed to the schema. Replace that stale evidence with the mutually verified digest and agreement.
+
+Please make only these JARVIS-owned documentation corrections, run the affected contract tests, and
+append a new immutable result to MiTiR `docs/from-Jarvis.md` with the JARVIS commit SHA and test
+summary. Do not rewrite prior handoff entries.
+
+This is L1 documentation/contract reconciliation only. Both runners remain disabled pending the
+final acknowledgement. It grants no L2/L3/L4 authority and no live MiTiR API mutation, RM-T10,
+Trading mutation, recursive agent/runner invocation, merge, deployment, or destructive action.
