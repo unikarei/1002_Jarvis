@@ -28,7 +28,7 @@ Status: **SDD complete; implementation pending explicit approval.** All implemen
 | P5-T22 | Operator runbook | T20,T21 | docs | recovery/kill switch | review | L1 | yes | pending |
 | P5-T23 | Future gated L3 | T22 | policy/adapter | separately approved/tested | L3 gate | L3 | explicit separate approval | pending |
 
-P5-T1 evidence (2026-08-16): added the closed JSON Schema source at `docs/phase5/handoff-protocol-v1.schema.json`. Its normalized canonical-JSON SHA-256 is `6f7f9b365eec2b7538c3ca5c7ddc44b9b22c91bf310e431c5dc6f2bd5bd8b50d`, recorded in the adjacent `.sha256` file. The MiTiR peer has not yet agreed to the schema, so cross-project execution remains blocked.
+P5-T1 evidence (2026-08-16): JARVIS mirrors the mutually verified closed v1.0.0 schema at `docs/phase5/handoff-protocol-v1.schema.json`. Its independently normalized `canonical-json-v1` SHA-256 is `5fbb72a6cfb2c1164c3b7096da7cd80d067df5bce10e90d2e9b491ab66e3245f`, recorded in `handoff-protocol-v1.schema.sha256`. MiTiR read-only verification confirmed schema, digest, and fixture-corpus agreement; runners remain blocked pending the final acknowledgement.
 
 P5-T2 evidence (2026-08-16): added side-effect-free Markdown/YAML parsing and closed envelope/per-type payload validation in `jarvis.handoff`. It rejects unknown fields, malformed/multiple YAML blocks, expiration, wrong recipients, invalid request/response correlation, and unallowlisted payload fields; payload hashing uses canonical JSON SHA-256. `pytest -q tests/test_handoff_protocol.py`: 5 passed; full suite: 46 passed.
 

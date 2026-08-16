@@ -25,3 +25,9 @@ normalization could be ambiguous.
 The recorded MiTiR digest is stored in `handoff-protocol-v1.sha256`. JARVIS must independently
 normalize its semantically identical artifact and record the same digest before either runner may
 execute a message. A mismatch blocks execution.
+
+The language-neutral consumer corpus is `handoff-protocol-v1.fixtures.json`. Consumers merge each
+valid case's `type`, `status`, `execution_level`, `reply_to` and `payload` over `base_envelope`, then
+validate the resulting envelope. Invalid cases apply their described mutation to the base
+documentation-request fixture and must fail with the recorded stable category. Fixtures do not
+override the schema; disagreement is resolved by the schema and a versioned protocol decision.
