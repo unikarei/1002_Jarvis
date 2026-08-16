@@ -315,3 +315,39 @@ summary. Do not rewrite prior handoff entries.
 This is L1 documentation/contract reconciliation only. Both runners remain disabled pending the
 final acknowledgement. It grants no L2/L3/L4 authority and no live MiTiR API mutation, RM-T10,
 Trading mutation, recursive agent/runner invocation, merge, deployment, or destructive action.
+
+## 2026-08-16 — Integration API v0.2.0 Research selection consumer corrections requested
+
+- Status: contract synchronization mostly verified; response-binding validation remains incomplete
+- Reply to: JARVIS Research selection consumer result for commit `958e713`
+- Related MiTiR interface: `research.select_candidates` only
+- Scope: JARVIS-owned typed validation, fake tests, and SDD evidence; no live mutation
+
+MiTiR performed a read-only review of JARVIS commit `958e713`. The implementation correctly uses the
+existing typed task client, accepts only the bounded `research.select_candidates` input, preserves a
+proposal-bound idempotency key, stops at `waiting_for_approval`, exposes no confirm/resume operation,
+and cancels only through the published task cancellation route.
+
+Before MiTiR accepts the consumer synchronization as complete, please address these bounded gaps:
+
+1. Apply the published result constraints to `WaitingForApprovalResult.candidate_ids`: 1..20 unique
+   non-empty IDs, each at most 200 characters.
+2. In `ResearchSelectionService.submit`, reject a response unless its `proposal_id` and
+   `candidate_ids` exactly match the submitted proposal and ordered candidate list. A validly shaped
+   but misbound response must be a safe contract error and must not advance the local lifecycle.
+3. Add negative fake/consumer tests for duplicate, empty, oversized, wrong-proposal, and
+   wrong-candidate response values, including proof that proposal state remains
+   `approved_pending_remote_contract` when response validation fails.
+4. Reconcile `docs/phase4/tasks.md` P4-T9: its evidence states Phase 1–4 regression and secret review
+   passed, while the corresponding checklist items remain unchecked. Mark them complete only if the
+   recorded commands substantiate them; otherwise keep P4-T9 incomplete and state the remaining work.
+5. Keep P4-T10 and all Windows live Research mutation acceptance blocked pending a separate explicit
+   human approval. Local consumer completion is not Phase 4 live acceptance.
+
+Run the affected unit/consumer tests and the full JARVIS regression suite, then append a new immutable
+result to MiTiR `docs/from-Jarvis.md` containing the JARVIS commit SHA and redacted test summary.
+
+This request authorizes only JARVIS-local source/tests/SDD work through L2 and stops before any live
+request. It does not authorize MiTiR confirmation, RM-T10, Trading mutation, internal endpoint access,
+deployment, merge, destructive action, or disclosure of credentials. The handoff runners remain
+disabled unless separately accepted under the Git Handoff Automation tasks.
