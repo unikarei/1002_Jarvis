@@ -21,7 +21,7 @@ Status: **SDD complete; implementation pending explicit approval.** All implemen
 | P5-T15 | Secret redaction | T2,T8,T10 | redactor | no sensitive persistence/output | redaction | L2 | yes | complete |
 | P5-T16 | Task Scheduler integration | T5,T13 | CLI/service | safe Windows lifecycle | Windows fake | L1 | yes | complete |
 | P5-T17 | Unit suite | T1–T16 | tests | component suite green | unit | L2 | yes | complete |
-| P5-T18 | Consumer contract suite | T1,T17 | contract tests | semantic/hash parity | contract | L2 | yes | blocked — awaiting MiTiR fixture corpus and JARVIS publication |
+| P5-T18 | Consumer contract suite | T1,T17 | contract tests | semantic/hash parity | contract | L2 | yes | complete |
 | P5-T19 | Cross-repo integration | T5–T18 | integration tests | local two-repo flow | integration | L2 | yes | pending |
 | P5-T20 | Dry-run rollout | T19 | CLI/runbook | inspection only | dry-run | L0 | yes | pending |
 | P5-T21 | L2 acceptance | T19,T20 | runtime | stops pre-commit | acceptance | L2 | yes | pending |
@@ -44,6 +44,6 @@ P5-T11–P5-T15 evidence (2026-08-16): completed exact replay/conflict behavior,
 
 P5-T16/P5-T17 evidence (2026-08-16): added a limited-account, on-logon Task Scheduler command builder without registering a task. Unit tests use no external process; full suite: 65 passed. Scheduler registration remains an explicit operator action. A draft operator runbook exists for P5-T22, which remains pending its dry-run and L2 acceptance dependencies.
 
-P5-T18 evidence (2026-08-16): added JARVIS-side consumer tests that verify the normalized schema SHA-256 record and all closed v1.0.0 envelope definitions. The explicit schema-agreement request was sent through the permitted MiTiR `docs/from-Jarvis.md` handoff in commit `995f4d0`. MiTiR responded by proposing its artifact as the v1.0.0 baseline; JARVIS now mirrors it and independently calculates the matching canonical hash `5fbb72a6cfb2c1164c3b7096da7cd80d067df5bce10e90d2e9b491ab66e3245f`. Full JARVIS suite: 67 passed. P5-T18 remains blocked until MiTiR publishes the promised shared fixture corpus and JARVIS publishes this synchronized artifact for MiTiR's read-only verification.
+P5-T18 evidence (2026-08-16): MiTiR published the language-neutral corpus in commit `9b08903`. JARVIS mirrors it at `docs/phase5/handoff-protocol-v1.fixtures.json`; the shared canonical schema digest is `5fbb72a6cfb2c1164c3b7096da7cd80d067df5bce10e90d2e9b491ab66e3245f`. The JARVIS consumer contract test executes all 9 valid and 7 invalid shared cases through `parse_markdown_entry`; schema/hash and fixture tests pass. Full JARVIS suite: 68 passed. The result is ready for MiTiR read-only verification through the designated handoff channel.
 
 Implementation order is P5-T2 through P5-T22, with P5-T23 outside the initial release.

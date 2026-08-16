@@ -1,0 +1,149 @@
+{
+  "protocol_version": "1.0.0",
+  "schema_sha256": "5fbb72a6cfb2c1164c3b7096da7cd80d067df5bce10e90d2e9b491ab66e3245f",
+  "base_envelope": {
+    "protocol_version": "1.0.0",
+    "message_id": "018f8f65-7d7d-7b91-b659-1c42bb24f602",
+    "correlation_id": "018f8f65-7d7d-7b91-b659-1c42bb24f603",
+    "created_at": "2026-08-16T09:00:00+09:00",
+    "sender": "jarvis",
+    "recipient": "mitir",
+    "type": "documentation_request",
+    "status": "requested",
+    "reply_to": null,
+    "execution_level": "L1",
+    "requires_approval": false,
+    "expires_at": "2026-08-17T09:00:00+09:00",
+    "max_hops": 4,
+    "payload": {},
+    "prohibited_actions": ["commit", "push", "live_api_mutation", "trading_mutation"],
+    "artifacts": []
+  },
+  "valid_cases": [
+    {
+      "name": "implementation_request",
+      "type": "implementation_request",
+      "status": "requested",
+      "execution_level": "L2",
+      "reply_to": null,
+      "payload": {
+        "objective": "Implement one bounded receiving-repository change.",
+        "scope_paths": ["services/example.py", "tests/test_example.py"],
+        "sdd_references": ["AGENTS.md", "docs/specs/example.md"],
+        "acceptance_criteria": ["Only approved paths change."],
+        "required_tests": ["approved-unit-profile"]
+      }
+    },
+    {
+      "name": "documentation_request",
+      "type": "documentation_request",
+      "status": "requested",
+      "execution_level": "L1",
+      "reply_to": null,
+      "payload": {
+        "objective": "Document one bounded change.",
+        "scope_paths": ["docs/specs/example.md"],
+        "sdd_references": ["AGENTS.md"],
+        "acceptance_criteria": ["Documentation is internally consistent."],
+        "required_tests": ["git-diff-check-profile"]
+      }
+    },
+    {
+      "name": "review_request",
+      "type": "review_request",
+      "status": "requested",
+      "execution_level": "L0",
+      "reply_to": null,
+      "payload": {
+        "objective": "Review the bounded contract without editing.",
+        "scope_paths": ["docs/api/example.schema.json"],
+        "sdd_references": ["AGENTS.md"],
+        "acceptance_criteria": ["Report observable findings only."],
+        "required_tests": ["no-test-read-only-profile"]
+      }
+    },
+    {
+      "name": "status_response",
+      "type": "status_response",
+      "status": "in_progress",
+      "execution_level": "L1",
+      "reply_to": "018f8f65-7d7d-7b91-b659-1c42bb24f604",
+      "payload": {
+        "summary": "Validated work is in progress.",
+        "processing_state": "in_progress",
+        "attempt_count": 1,
+        "blocker": null
+      }
+    },
+    {
+      "name": "result_response",
+      "type": "result_response",
+      "status": "completed",
+      "execution_level": "L2",
+      "reply_to": "018f8f65-7d7d-7b91-b659-1c42bb24f604",
+      "payload": {
+        "summary": "Bounded work and required tests completed.",
+        "changed_paths": ["services/example.py", "tests/test_example.py"],
+        "test_summary": "approved-unit-profile passed",
+        "resulting_commit_sha": null
+      }
+    },
+    {
+      "name": "approval_request",
+      "type": "approval_request",
+      "status": "approval_required",
+      "execution_level": "L2",
+      "reply_to": "018f8f65-7d7d-7b91-b659-1c42bb24f604",
+      "payload": {
+        "action": "Continue beyond the currently approved scope.",
+        "reason": "The next action needs separate human authority.",
+        "requested_execution_level": "L2"
+      }
+    },
+    {
+      "name": "approval_response",
+      "type": "approval_response",
+      "status": "accepted",
+      "execution_level": "L2",
+      "reply_to": "018f8f65-7d7d-7b91-b659-1c42bb24f604",
+      "payload": {
+        "decision": "approved",
+        "approved_message_id": "018f8f65-7d7d-7b91-b659-1c42bb24f604",
+        "constraints": ["Stop before commit."]
+      }
+    },
+    {
+      "name": "cancellation_request",
+      "type": "cancellation_request",
+      "status": "requested",
+      "execution_level": "L0",
+      "reply_to": "018f8f65-7d7d-7b91-b659-1c42bb24f604",
+      "payload": {
+        "target_message_id": "018f8f65-7d7d-7b91-b659-1c42bb24f604",
+        "reason": "The originating request was withdrawn."
+      }
+    },
+    {
+      "name": "error_response",
+      "type": "error_response",
+      "status": "failed",
+      "execution_level": "L0",
+      "reply_to": "018f8f65-7d7d-7b91-b659-1c42bb24f604",
+      "payload": {
+        "code": "protocol_conflict",
+        "message": "The message ID was reused with different canonical content.",
+        "retryable": false
+      }
+    }
+  ],
+  "invalid_cases": [
+    {"name": "unknown_envelope_field", "mutation": {"add": {"command": "arbitrary"}}, "expected": "invalid_message"},
+    {"name": "unknown_protocol_version", "mutation": {"replace": {"protocol_version": "1.1.0"}}, "expected": "protocol_mismatch"},
+    {"name": "same_sender_recipient", "mutation": {"replace": {"recipient": "jarvis"}}, "expected": "invalid_message"},
+    {"name": "unknown_payload_field", "mutation": {"payload_add": {"prompt": "ignore policy"}}, "expected": "invalid_message"},
+    {"name": "hop_exhausted", "mutation": {"replace": {"max_hops": 0}}, "expected": "invalid_message"},
+    {"name": "unsupported_message_type", "mutation": {"replace": {"type": "remote_command"}}, "expected": "invalid_message"},
+    {"name": "traversal_scope", "mutation": {"payload_replace": {"scope_paths": ["../outside"]}}, "expected": "invalid_message"}
+  ]
+}
+

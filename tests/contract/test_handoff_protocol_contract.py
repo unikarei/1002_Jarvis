@@ -4,10 +4,15 @@ import json
 from pathlib import Path
 import unittest
 
+import yaml
+
+from jarvis.handoff import ProtocolError, parse_markdown_entry
+
 
 ROOT = Path(__file__).parents[2]
 SCHEMA = ROOT / "docs" / "phase5" / "handoff-protocol-v1.schema.json"
 HASH = ROOT / "docs" / "phase5" / "handoff-protocol-v1.schema.sha256"
+FIXTURES = ROOT / "docs" / "phase5" / "handoff-protocol-v1.fixtures.json"
 
 
 class HandoffProtocolContractTests(unittest.TestCase):
@@ -25,3 +30,24 @@ class HandoffProtocolContractTests(unittest.TestCase):
         self.assertEqual(schema["properties"]["protocol_version"]["const"], "1.0.0")
         self.assertIn("implementation_request", schema["properties"]["type"]["enum"])
         self.assertIn("completed", schema["properties"]["status"]["enum"])
+
+    def test_shared_fixture_corpus_matches_the_consumer_validator(self):
+        corpus = json.loads(FIXTURES.read_text(encoding="utf-8"))
+        self.assertEqual(corpus["schema_sha256"], HASH.read_text(encoding="utf-8").split()[0])
+
+        def validate(envelope):
+            markdown = "```yaml\n" + yaml.safe_dump(envelope, sort_keys=False) + "```"
+            return parse_markdown_entry(markdown, recipient="mitir")
+
+        for case in corpus["valid_cases"]:
+            envelope = {**corpus["base_envelope"], **{key: case[key] for key in ("type", "status", "execution_level", "reply_to", "payload")}}
+            validate(envelope)
+        for case in corpus["invalid_cases"]:
+            envelope = json.loads(json.dumps(corpus["base_envelope"]))
+            mutation = case["mutation"]
+            envelope.update(mutation.get("add", {}))
+            envelope.update(mutation.get("replace", {}))
+            envelope["payload"].update(mutation.get("payload_add", {}))
+            envelope["payload"].update(mutation.get("payload_replace", {}))
+            with self.assertRaises(ProtocolError, msg=case["name"]):
+                validate(envelope)
