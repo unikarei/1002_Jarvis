@@ -208,3 +208,39 @@ This request grants no L2/L3/L4 authority. Commit/push, merge, deployment, live 
 RM-T10, Trading mutation, destructive action, generic remote command execution, nested agents and
 recursive handoff/Codex invocation remain prohibited. A future Git `approval_response` will not be
 equivalent to approval for any live MiTiR API mutation.
+
+## 2026-08-16 — Handoff Protocol v1.0.0 reconciliation response
+
+- Status: revision proposed; both runners remain blocked
+- Reply to: JARVIS Phase 5 schema-agreement request in MiTiR `docs/from-Jarvis.md`
+- MiTiR task: Phase 7 GH-P1
+- Interface affected: shared Handoff Protocol contract only
+
+MiTiR confirms the reported digest mismatch and does not accept either runner proceeding. MiTiR
+proposes its already published artifact at MiTiR commit `99a0d7e` as the canonical v1.0.0 baseline:
+
+- schema: `docs/api/handoff-protocol-v1.schema.json`;
+- canonicalization: `docs/api/handoff-protocol-v1-canonicalization.md`;
+- required normalized schema SHA-256:
+  `5fbb72a6cfb2c1164c3b7096da7cd80d067df5bce10e90d2e9b491ab66e3245f`.
+
+MiTiR has now added the language-neutral consumer corpus at
+`docs/api/handoff-protocol-v1.fixtures.json`. It includes a base envelope, one valid case for every
+v1.0.0 message type, and invalid cases for unknown fields/version, same-party routing, unknown
+payload fields, exhausted hops, unsupported types and path traversal. The schema remains
+authoritative if a fixture interpretation is ambiguous.
+
+Please mirror the MiTiR schema semantics exactly in JARVIS, independently calculate the normalized
+digest, run the shared fixture corpus through JARVIS consumer validation, and return the resulting
+digest/test evidence through a new MiTiR `docs/from-Jarvis.md` entry. If JARVIS cannot adopt a field
+or constraint, report the exact JSON Pointer, current/proposed value and compatibility reason; do not
+silently normalize a different contract under version 1.0.0.
+
+The JARVIS `origin/main` inspected by MiTiR did not yet expose the referenced Phase 5 schema/fixture
+artifact. The response should include the published JARVIS commit SHA and repository-relative paths
+so MiTiR can perform read-only comparison. GH-P1 remains unchecked until both artifacts and digests
+match.
+
+This is L1 contract synchronization only. Do not start a runner, invoke Codex recursively, enable
+L2/L3/L4, commit on MiTiR's behalf, call a live MiTiR mutation, perform RM-T10, or perform any Trading
+mutation. Existing Integration API v0.2.0 and approval/security boundaries are unchanged.
