@@ -44,3 +44,21 @@ class ResearchSelectionContractTests(unittest.TestCase):
         self.assertEqual(result.next_action, "await_mitir_confirmation_contract")
         self.assertEqual(client.calls, 1)
         self.assertEqual(lifecycle._store.get(proposal.proposal_id).state, ProposalState.WAITING_FOR_APPROVAL)
+        with self.assertRaises(Exception):
+            ResearchSelectionService(client).submit(lifecycle._store.get(proposal.proposal_id), approval_reference="gate-a-approved", candidate_ids=["candidate-1"], lifecycle=lifecycle)
+        self.assertEqual(client.calls, 1)
+
+    def test_waiting_task_cancellation_uses_only_the_published_cancel_route(self):
+        class FakeClient:
+            def __init__(self, task): self.task, self.cancelled = task, []
+            def create_task(self, request, *, idempotency_key): return self.task
+            def cancel_task(self, task_id):
+                self.cancelled.append(task_id)
+                return TaskRecord.model_validate({**self.task.model_dump(mode="json"), "state": "cancelled"})
+        lifecycle = ResearchProposalService()
+        proposal = lifecycle.approve(lifecycle.propose("Start Research on batteries").proposal_id)
+        client = FakeClient(self._waiting_task(proposal.proposal_id))
+        service = ResearchSelectionService(client)
+        waiting = service.submit(proposal, approval_reference="gate-a-approved", candidate_ids=["candidate-1"], lifecycle=lifecycle)
+        self.assertEqual(service.cancel_waiting(waiting, lifecycle=lifecycle).state, ProposalState.CANCELLED)
+        self.assertEqual(client.cancelled, [waiting.task_id])

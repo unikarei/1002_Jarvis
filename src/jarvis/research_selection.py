@@ -25,6 +25,13 @@ class ResearchSelectionService:
             lifecycle.waiting_for_approval(proposal.proposal_id)
         return ResearchSelectionWaiting(str(waiting.proposal_id), str(task.id), str(waiting.mitir_confirmation_id), waiting.expires_at.isoformat(), waiting.next_action)
 
+    def cancel_waiting(self, waiting: ResearchSelectionWaiting, *, lifecycle) -> ResearchActionProposal:
+        """Use the published cancellation route; never confirm or resume a MiTiR action."""
+        task = self._client.cancel_task(waiting.task_id)
+        if task.state is not TaskState.CANCELLED:
+            raise ProposalError("MiTiR did not return the required cancelled state.")
+        return lifecycle.cancelled(waiting.proposal_id)
+
 def present_waiting_for_approval(waiting: ResearchSelectionWaiting) -> str:
     """Present the published MiTiR confirmation requirement without taking further action."""
     return "\n".join((

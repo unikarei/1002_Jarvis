@@ -109,6 +109,9 @@ class ResearchProposalService:
     def waiting_for_approval(self, proposal_id: str) -> ResearchActionProposal:
         return self._store.transition(proposal_id, ProposalState.SUBMITTED, ProposalState.WAITING_FOR_APPROVAL)
 
+    def cancelled(self, proposal_id: str) -> ResearchActionProposal:
+        return self._store.transition(proposal_id, ProposalState.WAITING_FOR_APPROVAL, ProposalState.CANCELLED)
+
     def _resolve_pending(self, proposal_id: str | None) -> ResearchActionProposal:
         if proposal_id:
             proposal = self._store.get(proposal_id)

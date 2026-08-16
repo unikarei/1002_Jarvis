@@ -106,6 +106,22 @@ class MiTiRClientContractTests(unittest.TestCase):
         self.assertEqual(caught.exception.status_code, 409)
         self.assertFalse(caught.exception.error.retryable)
 
+    def test_selection_request_replay_conflict_and_cancellation_follow_v020_contract(self) -> None:
+        proposal_id = "22222222-2222-4222-8222-222222222222"
+        waiting = task_record("waiting_for_approval")
+        waiting.update({"capability_id": "research.select_candidates", "result": {"status": "waiting_for_approval", "proposal_id": proposal_id, "candidate_ids": ["candidate-1"], "mitir_confirmation_id": "33333333-3333-4333-8333-333333333333", "expires_at": NOW, "next_action": "await_mitir_confirmation_contract"}})
+        cancelled = {**waiting, "state": "cancelled"}
+        transport = FakeTransport((202, waiting), (200, waiting), (409, {"error": {"code": "idempotency_conflict", "message": "payload changed", "retryable": False}}), (200, cancelled))
+        client = self.client(transport)
+        request = TaskRequest(capability_id="research.select_candidates", input={"proposal_id": proposal_id, "approval_reference": "gate-a", "candidate_ids": ["candidate-1"]})
+        self.assertEqual(client.create_task(request, idempotency_key="selection-key").state, TaskState.WAITING_FOR_APPROVAL)
+        self.assertEqual(client.create_task(request, idempotency_key="selection-key").state, TaskState.WAITING_FOR_APPROVAL)
+        with self.assertRaises(MiTiRAPIError) as caught:
+            client.create_task(TaskRequest(capability_id="research.select_candidates", input={"proposal_id": proposal_id, "approval_reference": "gate-a", "candidate_ids": ["candidate-2"]}), idempotency_key="selection-key")
+        self.assertEqual(caught.exception.status_code, 409)
+        self.assertFalse(caught.exception.error.retryable)
+        self.assertEqual(client.cancel_task(TASK_ID).state, TaskState.CANCELLED)
+
     def test_get_and_cancel_use_uuid_paths(self) -> None:
         transport = FakeTransport((200, task_record("running")), (200, task_record("cancel_requested")))
         client = self.client(transport)

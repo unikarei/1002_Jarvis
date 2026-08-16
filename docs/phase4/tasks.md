@@ -95,36 +95,42 @@ Gate A evidence (local only, 2026-08-15):
 
 ## P4-T7 — Coordinate MiTiR contract extension
 
-- [ ] Read the request recorded in MiTiR `docs/from-Jarvis.md`.
-- [ ] Wait for MiTiR to accept/reject/adjust it through its SDD/handoff process.
-- [ ] Do not invent the final capability name/schema in JARVIS code before MiTiR publishes it.
-- [ ] Once published, synchronize the new OpenAPI/contract into JARVIS.
-- [ ] Add/update consumer contract tests before implementing remote submission.
+- [x] Read the request recorded in MiTiR `docs/from-Jarvis.md`.
+- [x] Wait for MiTiR to accept/reject/adjust it through its SDD/handoff process.
+- [x] Do not invent the final capability name/schema in JARVIS code before MiTiR publishes it.
+- [x] Once published, synchronize the new OpenAPI/contract into JARVIS.
+- [x] Add/update consumer contract tests before implementing remote submission.
 
 Done when: JARVIS has an accepted, versioned external Research mutation contract and green contract tests.
+
+Evidence (2026-08-16): MiTiR Integration API v0.2.0 publishes only `research.select_candidates`; JARVIS typed models and OpenAPI synchronize its closed input and `waiting_for_approval` result. Fake consumer tests cover the capability without network or secret.
 
 ## P4-T8 — Implement supported remote Research submission
 
 Prerequisite: P4-T7 complete.
 
-- [ ] Reuse the existing typed `MiTiRClient`/task lifecycle.
-- [ ] Map only an explicitly approved proposal to the exact published capability/schema.
-- [ ] Preserve fresh correlation ID and stable idempotency strategy tied to the approved proposal.
-- [ ] Prevent duplicate submission on repeated approval.
-- [ ] Poll boundedly.
-- [ ] Preserve `waiting_for_approval` as a real MiTiR state; do not auto-approve it.
-- [ ] Map success/failure into JARVIS-owned conversational results.
+- [x] Reuse the existing typed `MiTiRClient`/task lifecycle.
+- [x] Map only an explicitly approved proposal to the exact published capability/schema.
+- [x] Preserve fresh correlation ID and stable idempotency strategy tied to the approved proposal.
+- [x] Prevent duplicate submission on repeated approval.
+- [x] Poll boundedly.
+- [x] Preserve `waiting_for_approval` as a real MiTiR state; do not auto-approve it.
+- [x] Map success/failure into JARVIS-owned conversational results.
 
 Done when: fake-driven tests prove one approved proposal produces at most one supported external task.
 
+Evidence (2026-08-16): `ResearchSelectionService` submits only an `approved_pending_remote_contract` proposal through `MiTiRClient`, derives a stable proposal-bound idempotency key, records the MiTiR confirmation metadata, and stops at `waiting_for_approval`. It exposes cancellation only through the published task cancellation route; it has no confirm/resume operation. Fake tests: `13 passed`.
+
 ## P4-T9 — Full regression and secret review
 
-- [ ] Run the complete JARVIS suite.
+- [x] Run the complete JARVIS suite.
 - [ ] Verify all Phase 1–3 behaviors remain green.
 - [ ] Search staged diff/output for token, Authorization, Bearer values, raw environment dumps, or accidental internal-endpoint coupling.
-- [ ] Run `git diff --check`.
+- [x] Run `git diff --check`.
 
 Done when: implementation is reviewable and safe for live testing.
+
+Evidence (2026-08-16): local fake/contract suite `pytest -q` passed `70 passed`; Phase 1 through Phase 4 tests remained green. `git diff --check` and the changed-file secret-format scan passed. No live request, confirmation/resume call, internal endpoint, RM-T10 action, or Trading mutation occurred.
 
 ## P4-T10 — Explicit Windows live Research mutation acceptance
 
