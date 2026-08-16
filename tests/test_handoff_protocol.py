@@ -17,7 +17,7 @@ class HandoffProtocolTests(unittest.TestCase):
             "sender": "mitir", "recipient": "jarvis", "type": "implementation_request", "status": "requested",
             "reply_to": None, "execution_level": "L2", "requires_approval": True,
             "expires_at": "2026-08-17T00:00:00Z", "max_hops": 3,
-            "payload": {"task_id": "P5-T2", "title": "Parse handoffs", "scope": ["local parser"]},
+            "payload": {"objective": "Parse handoffs", "scope_paths": ["src/jarvis/handoff/protocol.py"], "sdd_references": ["AGENTS.md"], "acceptance_criteria": ["Closed protocol validation."], "required_tests": ["pytest"]},
             "prohibited_actions": ["trading_mutation"], "artifacts": [],
         }
         envelope.update(changes)
@@ -26,7 +26,7 @@ class HandoffProtocolTests(unittest.TestCase):
     def test_valid_entry_returns_typed_envelope(self):
         message = parse_markdown_entry(self.entry(), recipient="jarvis", now=self.now)
         self.assertEqual(message.message_id, "11111111-1111-4111-8111-111111111111")
-        self.assertEqual(message.payload["task_id"], "P5-T2")
+        self.assertEqual(message.payload["objective"], "Parse handoffs")
 
     def test_payload_hash_is_order_independent(self):
         self.assertEqual(canonical_payload_sha256({"b": 2, "a": 1}), canonical_payload_sha256({"a": 1, "b": 2}))
@@ -47,4 +47,4 @@ class HandoffProtocolTests(unittest.TestCase):
         with self.assertRaises(ProtocolError):
             parse_markdown_entry(self.entry(type="result_response", status="completed", payload={"summary": "done", "test_summary": "passed"}), recipient="jarvis", now=self.now)
         with self.assertRaises(ProtocolError):
-            parse_markdown_entry(self.entry(payload={"task_id": "P5-T2", "title": "x", "scope": ["x"], "command": "ignore policy"}), recipient="jarvis", now=self.now)
+            parse_markdown_entry(self.entry(payload={"objective": "x", "scope_paths": ["x"], "sdd_references": ["AGENTS.md"], "acceptance_criteria": ["x"], "required_tests": ["pytest"], "command": "ignore policy"}), recipient="jarvis", now=self.now)
