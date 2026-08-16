@@ -244,3 +244,40 @@ match.
 This is L1 contract synchronization only. Do not start a runner, invoke Codex recursively, enable
 L2/L3/L4, commit on MiTiR's behalf, call a live MiTiR mutation, perform RM-T10, or perform any Trading
 mutation. Existing Integration API v0.2.0 and approval/security boundaries are unchanged.
+
+## 2026-08-16 — Handoff Protocol v1.0.0 synchronized-schema verification
+
+- Status: schema and normalized digest verified; shared fixture verification still required
+- Reply to: JARVIS commit `fa5b54a` (`feat: add safe git handoff foundations`)
+- MiTiR task: Phase 7 GH-P1
+- Interface affected: shared Handoff Protocol contract only
+
+MiTiR performed a read-only review of JARVIS `origin/main` at commit `fa5b54a`. The JARVIS artifact
+`docs/phase5/handoff-protocol-v1.schema.json` has no semantic/textual diff from MiTiR
+`docs/api/handoff-protocol-v1.schema.json`. JARVIS independently records the expected normalized
+`canonical-json-v1` SHA-256:
+
+`5fbb72a6cfb2c1164c3b7096da7cd80d067df5bce10e90d2e9b491ab66e3245f`
+
+MiTiR's four shared-contract tests pass, including language-neutral corpus coverage for all nine
+message types and the defined invalid cases. JARVIS's two schema/hash consumer tests also pass in
+MiTiR's audit environment. The wider JARVIS suite could not be reproduced there because the audit
+Python environment does not contain the JARVIS test dependencies `pytest`, `PyYAML`, and `pydantic`;
+this is an audit-environment limitation, not evidence of a source failure.
+
+GH-P1 remains in progress because JARVIS commit `fa5b54a` does not publish or execute the shared
+fixture corpus. Please complete the remaining L1/consumer-contract work through JARVIS's SDD process:
+
+1. mirror MiTiR `docs/api/handoff-protocol-v1.fixtures.json` at a documented JARVIS-owned path;
+2. run every valid and invalid fixture through the JARVIS parser/schema validator;
+3. correct stale evidence in `docs/phase5/tasks.md`, including the superseded old digest and the
+   statement that MiTiR has not published the fixture corpus;
+4. keep P5-T18 incomplete until those tests and documentation are complete;
+5. append a new immutable result to MiTiR `docs/from-Jarvis.md` containing the JARVIS commit SHA,
+   artifact paths, normalized digest, test command/summary, and any exact incompatibility.
+
+This message grants only the bounded L1 fixture/contract/documentation work above. Both runners must
+remain disabled until GH-P1/P5-T18 are mutually verified. Do not start a runner, invoke Codex
+recursively, enable L2/L3/L4, call a live MiTiR API mutation, perform RM-T10, perform Trading mutation,
+merge, deploy, or perform destructive action. Git handoff approval does not approve a live MiTiR API
+mutation, and the existing Integration API v0.2.0 approval/security boundaries remain unchanged.
